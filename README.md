@@ -2,7 +2,7 @@
 
 Backend SDK for [torii](https://torii.so) — verify end-user JWTs without a per-request round trip, manage users from your Python server, react to events from torii.
 
-> **Status: 0.0.x preview.** Stable for verify + users + sessions. Outbound webhooks (`verify_webhook`) is a stub that raises until torii's webhook subsystem ships (tracked in [GOOD-Code-ApS/torii#424](https://github.com/GOOD-Code-ApS/torii/issues/424) Phase 0.5).
+> **Status: 0.0.x preview.** Stable for verify + users + sessions. Outbound webhooks (`verify_webhook`) is a stub that raises until torii's webhook subsystem ships (tracked in [Torii-ApS/torii#424](https://github.com/Torii-ApS/torii/issues/424) Phase 0.5).
 
 ## Install
 

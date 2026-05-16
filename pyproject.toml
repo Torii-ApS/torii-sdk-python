@@ -41,8 +41,8 @@ dev = [
 
 [project.urls]
 Homepage = "https://torii.so"
-Source = "https://github.com/GOOD-Code-ApS/torii-sdk-python"
-Issues = "https://github.com/GOOD-Code-ApS/torii-sdk-python/issues"
+Source = "https://github.com/Torii-ApS/torii-sdk-python"
+Issues = "https://github.com/Torii-ApS/torii-sdk-python/issues"
 
 [build-system]
 requires = ["hatchling"]

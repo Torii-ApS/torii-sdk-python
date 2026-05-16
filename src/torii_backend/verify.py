@@ -142,7 +142,7 @@ def verify_webhook(
     .. warning::
 
        torii's outbound webhook subsystem hasn't shipped yet (tracked in
-       `GitHub issue #424 <https://github.com/GOOD-Code-ApS/torii/issues/424>`_
+       `GitHub issue #424 <https://github.com/Torii-ApS/torii/issues/424>`_
        Phase 0.5). This stub keeps the SDK surface stable so adopting it
        later won't be a breaking change for callers.
     """
