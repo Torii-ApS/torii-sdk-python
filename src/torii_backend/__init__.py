@@ -17,6 +17,9 @@ from torii_backend.generated.models import (
     CursorPageResponseUserResponse as ToriiCursorPageUser,
 )
 from torii_backend.generated.models import (
+    ProblemDetail as ToriiProblemDetail,
+)
+from torii_backend.generated.models import (
     UpdateUserRequest as ToriiUpdateUserInput,
 )
 from torii_backend.generated.models import (
@@ -40,6 +43,7 @@ __all__ = [
     "ToriiClient",
     "ToriiCreateUserInput",
     "ToriiCursorPageUser",
+    "ToriiProblemDetail",
     "ToriiSession",
     "ToriiUpdateUserInput",
     "ToriiUser",

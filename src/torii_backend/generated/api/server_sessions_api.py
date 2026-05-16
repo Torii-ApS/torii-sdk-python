@@ -15,7 +15,9 @@ from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
 from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
+from pydantic import Field
 from typing import List
+from typing_extensions import Annotated
 from uuid import UUID
 from torii_backend.generated.models.user_session_response import UserSessionResponse
 
@@ -40,7 +42,7 @@ class ServerSessionsApi:
     @validate_call
     def list_sessions(
         self,
-        user_id: UUID,
+        user_id: Annotated[UUID, Field(description="Identifier of the user whose sessions to list.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -56,8 +58,9 @@ class ServerSessionsApi:
     ) -> List[UserSessionResponse]:
         """List user sessions
 
+        Returns all active (unexpired, unrevoked) sessions for the user, ordered by most recently used.
 
-        :param user_id: (required)
+        :param user_id: Identifier of the user whose sessions to list. (required)
         :type user_id: UUID
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -91,6 +94,8 @@ class ServerSessionsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[UserSessionResponse]",
+            '401': "ProblemDetail",
+            '403': "ProblemDetail",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -106,7 +111,7 @@ class ServerSessionsApi:
     @validate_call
     def list_sessions_with_http_info(
         self,
-        user_id: UUID,
+        user_id: Annotated[UUID, Field(description="Identifier of the user whose sessions to list.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -122,8 +127,9 @@ class ServerSessionsApi:
     ) -> ApiResponse[List[UserSessionResponse]]:
         """List user sessions
 
+        Returns all active (unexpired, unrevoked) sessions for the user, ordered by most recently used.
 
-        :param user_id: (required)
+        :param user_id: Identifier of the user whose sessions to list. (required)
         :type user_id: UUID
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -157,6 +163,8 @@ class ServerSessionsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[UserSessionResponse]",
+            '401': "ProblemDetail",
+            '403': "ProblemDetail",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -172,7 +180,7 @@ class ServerSessionsApi:
     @validate_call
     def list_sessions_without_preload_content(
         self,
-        user_id: UUID,
+        user_id: Annotated[UUID, Field(description="Identifier of the user whose sessions to list.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -188,8 +196,9 @@ class ServerSessionsApi:
     ) -> RESTResponseType:
         """List user sessions
 
+        Returns all active (unexpired, unrevoked) sessions for the user, ordered by most recently used.
 
-        :param user_id: (required)
+        :param user_id: Identifier of the user whose sessions to list. (required)
         :type user_id: UUID
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -223,6 +232,8 @@ class ServerSessionsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[UserSessionResponse]",
+            '401': "ProblemDetail",
+            '403': "ProblemDetail",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -267,7 +278,8 @@ class ServerSessionsApi:
         if 'Accept' not in _header_params:
             _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    'application/json', 
+                    'application/problem+json'
                 ]
             )
 
@@ -297,7 +309,7 @@ class ServerSessionsApi:
     @validate_call
     def revoke_all_sessions(
         self,
-        user_id: UUID,
+        user_id: Annotated[UUID, Field(description="Identifier of the user whose sessions to revoke.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -313,8 +325,9 @@ class ServerSessionsApi:
     ) -> None:
         """Revoke all sessions
 
+        Immediately revokes every active session for the user. Idempotent.
 
-        :param user_id: (required)
+        :param user_id: Identifier of the user whose sessions to revoke. (required)
         :type user_id: UUID
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -347,7 +360,9 @@ class ServerSessionsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '204': None,
+            '401': "ProblemDetail",
+            '403': "ProblemDetail",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -363,7 +378,7 @@ class ServerSessionsApi:
     @validate_call
     def revoke_all_sessions_with_http_info(
         self,
-        user_id: UUID,
+        user_id: Annotated[UUID, Field(description="Identifier of the user whose sessions to revoke.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -379,8 +394,9 @@ class ServerSessionsApi:
     ) -> ApiResponse[None]:
         """Revoke all sessions
 
+        Immediately revokes every active session for the user. Idempotent.
 
-        :param user_id: (required)
+        :param user_id: Identifier of the user whose sessions to revoke. (required)
         :type user_id: UUID
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -413,7 +429,9 @@ class ServerSessionsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '204': None,
+            '401': "ProblemDetail",
+            '403': "ProblemDetail",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -429,7 +447,7 @@ class ServerSessionsApi:
     @validate_call
     def revoke_all_sessions_without_preload_content(
         self,
-        user_id: UUID,
+        user_id: Annotated[UUID, Field(description="Identifier of the user whose sessions to revoke.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -445,8 +463,9 @@ class ServerSessionsApi:
     ) -> RESTResponseType:
         """Revoke all sessions
 
+        Immediately revokes every active session for the user. Idempotent.
 
-        :param user_id: (required)
+        :param user_id: Identifier of the user whose sessions to revoke. (required)
         :type user_id: UUID
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -479,7 +498,9 @@ class ServerSessionsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '204': None,
+            '401': "ProblemDetail",
+            '403': "ProblemDetail",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -520,6 +541,13 @@ class ServerSessionsApi:
         # process the body parameter
 
 
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/problem+json'
+                ]
+            )
 
 
         # authentication setting
@@ -547,8 +575,8 @@ class ServerSessionsApi:
     @validate_call
     def revoke_session(
         self,
-        user_id: UUID,
-        session_id: UUID,
+        user_id: Annotated[UUID, Field(description="Identifier of the user who owns the session.")],
+        session_id: Annotated[UUID, Field(description="Identifier of the session to revoke.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -564,10 +592,11 @@ class ServerSessionsApi:
     ) -> None:
         """Revoke specific session
 
+        Revokes a single session by id. Idempotent: returns 204 even if the session was already revoked or expired.
 
-        :param user_id: (required)
+        :param user_id: Identifier of the user who owns the session. (required)
         :type user_id: UUID
-        :param session_id: (required)
+        :param session_id: Identifier of the session to revoke. (required)
         :type session_id: UUID
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -601,7 +630,9 @@ class ServerSessionsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '204': None,
+            '401': "ProblemDetail",
+            '403': "ProblemDetail",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -617,8 +648,8 @@ class ServerSessionsApi:
     @validate_call
     def revoke_session_with_http_info(
         self,
-        user_id: UUID,
-        session_id: UUID,
+        user_id: Annotated[UUID, Field(description="Identifier of the user who owns the session.")],
+        session_id: Annotated[UUID, Field(description="Identifier of the session to revoke.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -634,10 +665,11 @@ class ServerSessionsApi:
     ) -> ApiResponse[None]:
         """Revoke specific session
 
+        Revokes a single session by id. Idempotent: returns 204 even if the session was already revoked or expired.
 
-        :param user_id: (required)
+        :param user_id: Identifier of the user who owns the session. (required)
         :type user_id: UUID
-        :param session_id: (required)
+        :param session_id: Identifier of the session to revoke. (required)
         :type session_id: UUID
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -671,7 +703,9 @@ class ServerSessionsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '204': None,
+            '401': "ProblemDetail",
+            '403': "ProblemDetail",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -687,8 +721,8 @@ class ServerSessionsApi:
     @validate_call
     def revoke_session_without_preload_content(
         self,
-        user_id: UUID,
-        session_id: UUID,
+        user_id: Annotated[UUID, Field(description="Identifier of the user who owns the session.")],
+        session_id: Annotated[UUID, Field(description="Identifier of the session to revoke.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -704,10 +738,11 @@ class ServerSessionsApi:
     ) -> RESTResponseType:
         """Revoke specific session
 
+        Revokes a single session by id. Idempotent: returns 204 even if the session was already revoked or expired.
 
-        :param user_id: (required)
+        :param user_id: Identifier of the user who owns the session. (required)
         :type user_id: UUID
-        :param session_id: (required)
+        :param session_id: Identifier of the session to revoke. (required)
         :type session_id: UUID
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -741,7 +776,9 @@ class ServerSessionsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '204': None,
+            '401': "ProblemDetail",
+            '403': "ProblemDetail",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -785,6 +822,13 @@ class ServerSessionsApi:
         # process the body parameter
 
 
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/problem+json'
+                ]
+            )
 
 
         # authentication setting

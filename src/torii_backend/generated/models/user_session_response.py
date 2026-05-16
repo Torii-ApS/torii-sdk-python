@@ -27,16 +27,16 @@ from pydantic_core import to_jsonable_python
 
 class UserSessionResponse(BaseModel):
     """
-    UserSessionResponse
+    An active end-user session in your environment.
     """ # noqa: E501
-    id: UUID
-    user_id: UUID = Field(alias="userId")
-    environment_id: UUID = Field(alias="environmentId")
-    user_agent: Optional[StrictStr] = Field(default=None, alias="userAgent")
-    ip_address: Optional[StrictStr] = Field(default=None, alias="ipAddress")
-    created_at: datetime = Field(alias="createdAt")
-    expires_at: datetime = Field(alias="expiresAt")
-    last_used_at: datetime = Field(alias="lastUsedAt")
+    id: UUID = Field(description="Unique identifier for this session.")
+    user_id: UUID = Field(description="Identifier of the end-user this session belongs to.", alias="userId")
+    environment_id: UUID = Field(description="Identifier of the environment this session belongs to.", alias="environmentId")
+    user_agent: Optional[StrictStr] = Field(default=None, description="Raw User-Agent string captured when the session was created.", alias="userAgent")
+    ip_address: Optional[StrictStr] = Field(default=None, description="IP address captured when the session was created.", alias="ipAddress")
+    created_at: datetime = Field(description="When this session was created (ISO-8601 UTC).", alias="createdAt")
+    expires_at: datetime = Field(description="When this session expires (ISO-8601 UTC).", alias="expiresAt")
+    last_used_at: datetime = Field(description="When this session was last seen by the API (ISO-8601 UTC).", alias="lastUsedAt")
     __properties: ClassVar[List[str]] = ["id", "userId", "environmentId", "userAgent", "ipAddress", "createdAt", "expiresAt", "lastUsedAt"]
 
     model_config = ConfigDict(

@@ -26,14 +26,14 @@ from pydantic_core import to_jsonable_python
 
 class UpdateUserRequest(BaseModel):
     """
-    UpdateUserRequest
+    PATCH body for updating an end-user. Every field is tri-state: omit the key entirely to leave the field unchanged, send a non-null value to set it, or send JSON null to clear it.
     """ # noqa: E501
-    name: Optional[StrictStr] = None
-    phone: Optional[StrictStr] = None
-    avatar_url: Optional[StrictStr] = Field(default=None, alias="avatarUrl")
-    locale: Optional[StrictStr] = None
-    address: Optional[StrictStr] = None
-    date_of_birth: Optional[date] = Field(default=None, alias="dateOfBirth")
+    name: Optional[StrictStr] = Field(default=None, description="New display name. Send null to clear; omit to leave unchanged.")
+    phone: Optional[StrictStr] = Field(default=None, description="New phone number. Send null to clear; omit to leave unchanged.")
+    avatar_url: Optional[StrictStr] = Field(default=None, description="New avatar URL. Send null to clear; omit to leave unchanged.", alias="avatarUrl")
+    locale: Optional[StrictStr] = Field(default=None, description="New preferred locale. Send null to clear; omit to leave unchanged.")
+    address: Optional[StrictStr] = Field(default=None, description="New postal address. Send null to clear; omit to leave unchanged.")
+    date_of_birth: Optional[date] = Field(default=None, description="New date of birth (YYYY-MM-DD). Send null to clear; omit to leave unchanged.", alias="dateOfBirth")
     __properties: ClassVar[List[str]] = ["name", "phone", "avatarUrl", "locale", "address", "dateOfBirth"]
 
     @field_validator('locale')
@@ -85,6 +85,36 @@ class UpdateUserRequest(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # set to None if name (nullable) is None
+        # and model_fields_set contains the field
+        if self.name is None and "name" in self.model_fields_set:
+            _dict['name'] = None
+
+        # set to None if phone (nullable) is None
+        # and model_fields_set contains the field
+        if self.phone is None and "phone" in self.model_fields_set:
+            _dict['phone'] = None
+
+        # set to None if avatar_url (nullable) is None
+        # and model_fields_set contains the field
+        if self.avatar_url is None and "avatar_url" in self.model_fields_set:
+            _dict['avatarUrl'] = None
+
+        # set to None if locale (nullable) is None
+        # and model_fields_set contains the field
+        if self.locale is None and "locale" in self.model_fields_set:
+            _dict['locale'] = None
+
+        # set to None if address (nullable) is None
+        # and model_fields_set contains the field
+        if self.address is None and "address" in self.model_fields_set:
+            _dict['address'] = None
+
+        # set to None if date_of_birth (nullable) is None
+        # and model_fields_set contains the field
+        if self.date_of_birth is None and "date_of_birth" in self.model_fields_set:
+            _dict['dateOfBirth'] = None
+
         return _dict
 
     @classmethod

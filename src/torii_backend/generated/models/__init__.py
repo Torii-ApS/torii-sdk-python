@@ -15,6 +15,7 @@
 # import models into model package
 from torii_backend.generated.models.create_user_request import CreateUserRequest
 from torii_backend.generated.models.cursor_page_response_user_response import CursorPageResponseUserResponse
+from torii_backend.generated.models.problem_detail import ProblemDetail
 from torii_backend.generated.models.server_user_search_request import ServerUserSearchRequest
 from torii_backend.generated.models.update_user_request import UpdateUserRequest
 from torii_backend.generated.models.user_response import UserResponse

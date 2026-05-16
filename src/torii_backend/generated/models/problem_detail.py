@@ -17,22 +17,23 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictBool
+from pydantic import BaseModel, ConfigDict, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
-from uuid import UUID
-from torii_backend.generated.models.user_response import UserResponse
 from typing import Optional, Set
 from typing_extensions import Self
 from pydantic_core import to_jsonable_python
 
-class CursorPageResponseUserResponse(BaseModel):
+class ProblemDetail(BaseModel):
     """
-    A single page of results in a cursor-paginated list. Pass `nextCursor` as the `cursor` query parameter to fetch the following page.
+    ProblemDetail
     """ # noqa: E501
-    items: List[UserResponse] = Field(description="Items in this page, in stable order.")
-    next_cursor: Optional[UUID] = Field(default=None, description="Cursor to pass to fetch the next page. Null when this is the last page.", alias="nextCursor")
-    has_more: StrictBool = Field(description="True if more pages are available (equivalent to `nextCursor != null`).", alias="hasMore")
-    __properties: ClassVar[List[str]] = ["items", "nextCursor", "hasMore"]
+    type: Optional[StrictStr] = None
+    title: Optional[StrictStr] = None
+    status: Optional[StrictInt] = None
+    detail: Optional[StrictStr] = None
+    instance: Optional[StrictStr] = None
+    properties: Optional[Dict[str, Any]] = None
+    __properties: ClassVar[List[str]] = ["type", "title", "status", "detail", "instance", "properties"]
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -52,7 +53,7 @@ class CursorPageResponseUserResponse(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of CursorPageResponseUserResponse from a JSON string"""
+        """Create an instance of ProblemDetail from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -73,23 +74,11 @@ class CursorPageResponseUserResponse(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of each item in items (list)
-        _items = []
-        if self.items:
-            for _item_items in self.items:
-                if _item_items:
-                    _items.append(_item_items.to_dict())
-            _dict['items'] = _items
-        # set to None if next_cursor (nullable) is None
-        # and model_fields_set contains the field
-        if self.next_cursor is None and "next_cursor" in self.model_fields_set:
-            _dict['nextCursor'] = None
-
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of CursorPageResponseUserResponse from a dict"""
+        """Create an instance of ProblemDetail from a dict"""
         if obj is None:
             return None
 
@@ -97,9 +86,12 @@ class CursorPageResponseUserResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "items": [UserResponse.from_dict(_item) for _item in obj["items"]] if obj.get("items") is not None else None,
-            "nextCursor": obj.get("nextCursor"),
-            "hasMore": obj.get("hasMore")
+            "type": obj.get("type"),
+            "title": obj.get("title"),
+            "status": obj.get("status"),
+            "detail": obj.get("detail"),
+            "instance": obj.get("instance"),
+            "properties": obj.get("properties")
         })
         return _obj
 

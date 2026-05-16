@@ -26,13 +26,13 @@ from pydantic_core import to_jsonable_python
 
 class ServerUserSearchRequest(BaseModel):
     """
-    ServerUserSearchRequest
+    Optional filter body for `POST /users/search`. Every field is tri-state: omit to skip that filter, send a value to require it, send JSON null to require null.
     """ # noqa: E501
-    name: Optional[StrictStr] = None
-    email: Optional[StrictStr] = None
-    statuses: Optional[List[StrictStr]] = None
-    created_after: Optional[datetime] = Field(default=None, alias="createdAfter")
-    created_before: Optional[datetime] = Field(default=None, alias="createdBefore")
+    name: Optional[StrictStr] = Field(default=None, description="Filter by name (exact match). Send null to require users with no name.")
+    email: Optional[StrictStr] = Field(default=None, description="Filter by primary email (exact match). Send null to require users with no email.")
+    statuses: Optional[List[StrictStr]] = Field(default=None, description="Filter by user status. Returns users matching any of the supplied statuses.")
+    created_after: Optional[datetime] = Field(default=None, description="Only return users created at or after this instant (ISO-8601 UTC).", alias="createdAfter")
+    created_before: Optional[datetime] = Field(default=None, description="Only return users created at or before this instant (ISO-8601 UTC).", alias="createdBefore")
     __properties: ClassVar[List[str]] = ["name", "email", "statuses", "createdAfter", "createdBefore"]
 
     @field_validator('statuses')
@@ -85,6 +85,16 @@ class ServerUserSearchRequest(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # set to None if name (nullable) is None
+        # and model_fields_set contains the field
+        if self.name is None and "name" in self.model_fields_set:
+            _dict['name'] = None
+
+        # set to None if email (nullable) is None
+        # and model_fields_set contains the field
+        if self.email is None and "email" in self.model_fields_set:
+            _dict['email'] = None
+
         # set to None if created_after (nullable) is None
         # and model_fields_set contains the field
         if self.created_after is None and "created_after" in self.model_fields_set:
