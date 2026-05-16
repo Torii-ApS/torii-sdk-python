@@ -18,9 +18,8 @@ import re  # noqa: F401
 import json
 
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List, Optional
-from torii_backend.generated.models.server_user_search_request_name import ServerUserSearchRequestName
 from typing import Optional, Set
 from typing_extensions import Self
 from pydantic_core import to_jsonable_python
@@ -29,12 +28,23 @@ class ServerUserSearchRequest(BaseModel):
     """
     ServerUserSearchRequest
     """ # noqa: E501
-    name: ServerUserSearchRequestName
-    email: ServerUserSearchRequestName
-    statuses: ServerUserSearchRequestName
+    name: Optional[StrictStr] = None
+    email: Optional[StrictStr] = None
+    statuses: Optional[List[StrictStr]] = None
     created_after: Optional[datetime] = Field(default=None, alias="createdAfter")
     created_before: Optional[datetime] = Field(default=None, alias="createdBefore")
     __properties: ClassVar[List[str]] = ["name", "email", "statuses", "createdAfter", "createdBefore"]
+
+    @field_validator('statuses')
+    def statuses_validate_enum(cls, value):
+        """Validates the enum"""
+        if value is None:
+            return value
+
+        for i in value:
+            if i not in set(['pending_verification', 'active', 'banned', 'deleted']):
+                raise ValueError("each list item must be one of ('pending_verification', 'active', 'banned', 'deleted')")
+        return value
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -75,15 +85,6 @@ class ServerUserSearchRequest(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of name
-        if self.name:
-            _dict['name'] = self.name.to_dict()
-        # override the default output from pydantic by calling `to_dict()` of email
-        if self.email:
-            _dict['email'] = self.email.to_dict()
-        # override the default output from pydantic by calling `to_dict()` of statuses
-        if self.statuses:
-            _dict['statuses'] = self.statuses.to_dict()
         # set to None if created_after (nullable) is None
         # and model_fields_set contains the field
         if self.created_after is None and "created_after" in self.model_fields_set:
@@ -106,9 +107,9 @@ class ServerUserSearchRequest(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "name": ServerUserSearchRequestName.from_dict(obj["name"]) if obj.get("name") is not None else None,
-            "email": ServerUserSearchRequestName.from_dict(obj["email"]) if obj.get("email") is not None else None,
-            "statuses": ServerUserSearchRequestName.from_dict(obj["statuses"]) if obj.get("statuses") is not None else None,
+            "name": obj.get("name"),
+            "email": obj.get("email"),
+            "statuses": obj.get("statuses"),
             "createdAfter": obj.get("createdAfter"),
             "createdBefore": obj.get("createdBefore")
         })
