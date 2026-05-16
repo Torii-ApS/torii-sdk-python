@@ -27,21 +27,21 @@ from pydantic_core import to_jsonable_python
 
 class UserResponse(BaseModel):
     """
-    UserResponse
+    An end-user belonging to one of your environments.
     """ # noqa: E501
-    id: UUID
-    environment_id: UUID = Field(alias="environmentId")
-    name: Optional[StrictStr] = None
-    phone: Optional[StrictStr] = None
-    avatar_url: Optional[StrictStr] = Field(default=None, alias="avatarUrl")
-    locale: Optional[StrictStr] = None
-    address: Optional[StrictStr] = None
-    date_of_birth: Optional[date] = Field(default=None, alias="dateOfBirth")
-    status: StrictStr
-    created_at: datetime = Field(alias="createdAt")
-    updated_at: datetime = Field(alias="updatedAt")
-    email: Optional[StrictStr] = None
-    deleted_at: Optional[datetime] = Field(default=None, alias="deletedAt")
+    id: UUID = Field(description="Unique identifier for this user.")
+    environment_id: UUID = Field(description="Identifier of the environment this user belongs to.", alias="environmentId")
+    name: Optional[StrictStr] = Field(default=None, description="Full name on the profile, if any.")
+    phone: Optional[StrictStr] = Field(default=None, description="Phone number on the profile, if any. Not guaranteed to be verified.")
+    avatar_url: Optional[StrictStr] = Field(default=None, description="URL of the user's avatar image, if any.", alias="avatarUrl")
+    locale: Optional[StrictStr] = Field(default=None, description="Preferred locale for emails and UI messages.")
+    address: Optional[StrictStr] = Field(default=None, description="Free-form address string, if provided.")
+    date_of_birth: Optional[date] = Field(default=None, description="Date of birth in ISO-8601 (YYYY-MM-DD), if provided.", alias="dateOfBirth")
+    status: StrictStr = Field(description="Lifecycle status of the user (e.g. active, banned).")
+    created_at: datetime = Field(description="When this user was created (ISO-8601 UTC).", alias="createdAt")
+    updated_at: datetime = Field(description="When this user was last modified (ISO-8601 UTC).", alias="updatedAt")
+    email: Optional[StrictStr] = Field(default=None, description="Primary email on the profile, if any. Not guaranteed to be verified.")
+    deleted_at: Optional[datetime] = Field(default=None, description="When this user was deleted, if soft-deleted. Null for active users.", alias="deletedAt")
     __properties: ClassVar[List[str]] = ["id", "environmentId", "name", "phone", "avatarUrl", "locale", "address", "dateOfBirth", "status", "createdAt", "updatedAt", "email", "deletedAt"]
 
     @field_validator('locale')

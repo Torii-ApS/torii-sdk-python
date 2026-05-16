@@ -26,14 +26,14 @@ from pydantic_core import to_jsonable_python
 
 class CreateUserRequest(BaseModel):
     """
-    CreateUserRequest
+    Request body for creating an end-user in your environment. All fields are optional; supply at minimum an email if you want the user to be able to sign in via email + password.
     """ # noqa: E501
-    email: Optional[StrictStr] = None
-    password: Optional[StrictStr] = None
-    name: Optional[StrictStr] = None
-    phone: Optional[StrictStr] = None
-    address: Optional[StrictStr] = None
-    date_of_birth: Optional[date] = Field(default=None, alias="dateOfBirth")
+    email: Optional[StrictStr] = Field(default=None, description="Primary email for the new user. If omitted, the user is created without a sign-in identity.")
+    password: Optional[StrictStr] = Field(default=None, description="Initial password. Subject to the environment's password policy. Omit to create a passwordless user (e.g. social-only).")
+    name: Optional[StrictStr] = Field(default=None, description="Display name to seed on the profile.")
+    phone: Optional[StrictStr] = Field(default=None, description="Phone number to seed on the profile.")
+    address: Optional[StrictStr] = Field(default=None, description="Postal address to seed on the profile.")
+    date_of_birth: Optional[date] = Field(default=None, description="Date of birth in ISO-8601 (YYYY-MM-DD).", alias="dateOfBirth")
     __properties: ClassVar[List[str]] = ["email", "password", "name", "phone", "address", "dateOfBirth"]
 
     model_config = ConfigDict(

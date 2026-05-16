@@ -15,8 +15,9 @@ from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
 from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
-from pydantic import StrictInt
+from pydantic import Field, StrictInt
 from typing import Optional
+from typing_extensions import Annotated
 from uuid import UUID
 from torii_backend.generated.models.create_user_request import CreateUserRequest
 from torii_backend.generated.models.cursor_page_response_user_response import CursorPageResponseUserResponse
@@ -45,7 +46,7 @@ class ServerUsersApi:
     @validate_call
     def ban_user(
         self,
-        user_id: UUID,
+        user_id: Annotated[UUID, Field(description="Identifier of the user to ban.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -61,8 +62,9 @@ class ServerUsersApi:
     ) -> UserResponse:
         """Ban user
 
+        Marks the user as banned and revokes all their active sessions.
 
-        :param user_id: (required)
+        :param user_id: Identifier of the user to ban. (required)
         :type user_id: UUID
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -96,6 +98,9 @@ class ServerUsersApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "UserResponse",
+            '401': "ProblemDetail",
+            '403': "ProblemDetail",
+            '404': "ProblemDetail",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -111,7 +116,7 @@ class ServerUsersApi:
     @validate_call
     def ban_user_with_http_info(
         self,
-        user_id: UUID,
+        user_id: Annotated[UUID, Field(description="Identifier of the user to ban.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -127,8 +132,9 @@ class ServerUsersApi:
     ) -> ApiResponse[UserResponse]:
         """Ban user
 
+        Marks the user as banned and revokes all their active sessions.
 
-        :param user_id: (required)
+        :param user_id: Identifier of the user to ban. (required)
         :type user_id: UUID
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -162,6 +168,9 @@ class ServerUsersApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "UserResponse",
+            '401': "ProblemDetail",
+            '403': "ProblemDetail",
+            '404': "ProblemDetail",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -177,7 +186,7 @@ class ServerUsersApi:
     @validate_call
     def ban_user_without_preload_content(
         self,
-        user_id: UUID,
+        user_id: Annotated[UUID, Field(description="Identifier of the user to ban.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -193,8 +202,9 @@ class ServerUsersApi:
     ) -> RESTResponseType:
         """Ban user
 
+        Marks the user as banned and revokes all their active sessions.
 
-        :param user_id: (required)
+        :param user_id: Identifier of the user to ban. (required)
         :type user_id: UUID
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -228,6 +238,9 @@ class ServerUsersApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "UserResponse",
+            '401': "ProblemDetail",
+            '403': "ProblemDetail",
+            '404': "ProblemDetail",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -272,7 +285,8 @@ class ServerUsersApi:
         if 'Accept' not in _header_params:
             _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    'application/json', 
+                    'application/problem+json'
                 ]
             )
 
@@ -318,6 +332,7 @@ class ServerUsersApi:
     ) -> UserResponse:
         """Create user
 
+        Creates an end-user in your environment. All body fields are optional; supply at minimum an email if you want the user to be able to sign in via email + password.
 
         :param create_user_request: (required)
         :type create_user_request: CreateUserRequest
@@ -352,7 +367,10 @@ class ServerUsersApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "UserResponse",
+            '201': "UserResponse",
+            '400': "ProblemDetail",
+            '401': "ProblemDetail",
+            '409': "ProblemDetail",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -384,6 +402,7 @@ class ServerUsersApi:
     ) -> ApiResponse[UserResponse]:
         """Create user
 
+        Creates an end-user in your environment. All body fields are optional; supply at minimum an email if you want the user to be able to sign in via email + password.
 
         :param create_user_request: (required)
         :type create_user_request: CreateUserRequest
@@ -418,7 +437,10 @@ class ServerUsersApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "UserResponse",
+            '201': "UserResponse",
+            '400': "ProblemDetail",
+            '401': "ProblemDetail",
+            '409': "ProblemDetail",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -450,6 +472,7 @@ class ServerUsersApi:
     ) -> RESTResponseType:
         """Create user
 
+        Creates an end-user in your environment. All body fields are optional; supply at minimum an email if you want the user to be able to sign in via email + password.
 
         :param create_user_request: (required)
         :type create_user_request: CreateUserRequest
@@ -484,7 +507,10 @@ class ServerUsersApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "UserResponse",
+            '201': "UserResponse",
+            '400': "ProblemDetail",
+            '401': "ProblemDetail",
+            '409': "ProblemDetail",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -529,7 +555,8 @@ class ServerUsersApi:
         if 'Accept' not in _header_params:
             _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    'application/json', 
+                    'application/problem+json'
                 ]
             )
 
@@ -572,7 +599,7 @@ class ServerUsersApi:
     @validate_call
     def delete_user(
         self,
-        user_id: UUID,
+        user_id: Annotated[UUID, Field(description="Identifier of the user to delete.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -588,8 +615,9 @@ class ServerUsersApi:
     ) -> None:
         """Delete user
 
+        Soft-deletes the user. Idempotent: returns 204 even if the user was already deleted.
 
-        :param user_id: (required)
+        :param user_id: Identifier of the user to delete. (required)
         :type user_id: UUID
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -622,7 +650,9 @@ class ServerUsersApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '204': None,
+            '401': "ProblemDetail",
+            '403': "ProblemDetail",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -638,7 +668,7 @@ class ServerUsersApi:
     @validate_call
     def delete_user_with_http_info(
         self,
-        user_id: UUID,
+        user_id: Annotated[UUID, Field(description="Identifier of the user to delete.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -654,8 +684,9 @@ class ServerUsersApi:
     ) -> ApiResponse[None]:
         """Delete user
 
+        Soft-deletes the user. Idempotent: returns 204 even if the user was already deleted.
 
-        :param user_id: (required)
+        :param user_id: Identifier of the user to delete. (required)
         :type user_id: UUID
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -688,7 +719,9 @@ class ServerUsersApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '204': None,
+            '401': "ProblemDetail",
+            '403': "ProblemDetail",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -704,7 +737,7 @@ class ServerUsersApi:
     @validate_call
     def delete_user_without_preload_content(
         self,
-        user_id: UUID,
+        user_id: Annotated[UUID, Field(description="Identifier of the user to delete.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -720,8 +753,9 @@ class ServerUsersApi:
     ) -> RESTResponseType:
         """Delete user
 
+        Soft-deletes the user. Idempotent: returns 204 even if the user was already deleted.
 
-        :param user_id: (required)
+        :param user_id: Identifier of the user to delete. (required)
         :type user_id: UUID
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -754,7 +788,9 @@ class ServerUsersApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '204': None,
+            '401': "ProblemDetail",
+            '403': "ProblemDetail",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -795,6 +831,13 @@ class ServerUsersApi:
         # process the body parameter
 
 
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/problem+json'
+                ]
+            )
 
 
         # authentication setting
@@ -822,7 +865,7 @@ class ServerUsersApi:
     @validate_call
     def get_user(
         self,
-        user_id: UUID,
+        user_id: Annotated[UUID, Field(description="Identifier of the user to fetch.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -838,8 +881,9 @@ class ServerUsersApi:
     ) -> UserResponse:
         """Get user
 
+        Returns the full profile for one end-user.
 
-        :param user_id: (required)
+        :param user_id: Identifier of the user to fetch. (required)
         :type user_id: UUID
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -873,6 +917,9 @@ class ServerUsersApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "UserResponse",
+            '401': "ProblemDetail",
+            '403': "ProblemDetail",
+            '404': "ProblemDetail",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -888,7 +935,7 @@ class ServerUsersApi:
     @validate_call
     def get_user_with_http_info(
         self,
-        user_id: UUID,
+        user_id: Annotated[UUID, Field(description="Identifier of the user to fetch.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -904,8 +951,9 @@ class ServerUsersApi:
     ) -> ApiResponse[UserResponse]:
         """Get user
 
+        Returns the full profile for one end-user.
 
-        :param user_id: (required)
+        :param user_id: Identifier of the user to fetch. (required)
         :type user_id: UUID
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -939,6 +987,9 @@ class ServerUsersApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "UserResponse",
+            '401': "ProblemDetail",
+            '403': "ProblemDetail",
+            '404': "ProblemDetail",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -954,7 +1005,7 @@ class ServerUsersApi:
     @validate_call
     def get_user_without_preload_content(
         self,
-        user_id: UUID,
+        user_id: Annotated[UUID, Field(description="Identifier of the user to fetch.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -970,8 +1021,9 @@ class ServerUsersApi:
     ) -> RESTResponseType:
         """Get user
 
+        Returns the full profile for one end-user.
 
-        :param user_id: (required)
+        :param user_id: Identifier of the user to fetch. (required)
         :type user_id: UUID
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -1005,6 +1057,9 @@ class ServerUsersApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "UserResponse",
+            '401': "ProblemDetail",
+            '403': "ProblemDetail",
+            '404': "ProblemDetail",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -1049,7 +1104,8 @@ class ServerUsersApi:
         if 'Accept' not in _header_params:
             _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    'application/json', 
+                    'application/problem+json'
                 ]
             )
 
@@ -1079,8 +1135,8 @@ class ServerUsersApi:
     @validate_call
     def search_users(
         self,
-        limit: Optional[StrictInt] = None,
-        cursor: Optional[UUID] = None,
+        limit: Annotated[Optional[StrictInt], Field(description="Maximum number of items in the returned page (default 20).")] = None,
+        cursor: Annotated[Optional[UUID], Field(description="Opaque cursor returned by the previous page's `nextCursor`. Omit to fetch the first page.")] = None,
         server_user_search_request: Optional[ServerUserSearchRequest] = None,
         _request_timeout: Union[
             None,
@@ -1097,10 +1153,11 @@ class ServerUsersApi:
     ) -> CursorPageResponseUserResponse:
         """Search users
 
+        Returns a cursor-paginated page of end-users in the environment matching the optional filters. Filters use the same tri-state PATCH semantics as `UpdateUserRequest`: omit a field to skip that filter, send a value to require it, send null to require null. Uses POST so the filter body can be sent without URL-encoding.
 
-        :param limit:
+        :param limit: Maximum number of items in the returned page (default 20).
         :type limit: int
-        :param cursor:
+        :param cursor: Opaque cursor returned by the previous page's `nextCursor`. Omit to fetch the first page.
         :type cursor: UUID
         :param server_user_search_request:
         :type server_user_search_request: ServerUserSearchRequest
@@ -1138,6 +1195,7 @@ class ServerUsersApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "CursorPageResponseUserResponse",
+            '401': "ProblemDetail",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -1153,8 +1211,8 @@ class ServerUsersApi:
     @validate_call
     def search_users_with_http_info(
         self,
-        limit: Optional[StrictInt] = None,
-        cursor: Optional[UUID] = None,
+        limit: Annotated[Optional[StrictInt], Field(description="Maximum number of items in the returned page (default 20).")] = None,
+        cursor: Annotated[Optional[UUID], Field(description="Opaque cursor returned by the previous page's `nextCursor`. Omit to fetch the first page.")] = None,
         server_user_search_request: Optional[ServerUserSearchRequest] = None,
         _request_timeout: Union[
             None,
@@ -1171,10 +1229,11 @@ class ServerUsersApi:
     ) -> ApiResponse[CursorPageResponseUserResponse]:
         """Search users
 
+        Returns a cursor-paginated page of end-users in the environment matching the optional filters. Filters use the same tri-state PATCH semantics as `UpdateUserRequest`: omit a field to skip that filter, send a value to require it, send null to require null. Uses POST so the filter body can be sent without URL-encoding.
 
-        :param limit:
+        :param limit: Maximum number of items in the returned page (default 20).
         :type limit: int
-        :param cursor:
+        :param cursor: Opaque cursor returned by the previous page's `nextCursor`. Omit to fetch the first page.
         :type cursor: UUID
         :param server_user_search_request:
         :type server_user_search_request: ServerUserSearchRequest
@@ -1212,6 +1271,7 @@ class ServerUsersApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "CursorPageResponseUserResponse",
+            '401': "ProblemDetail",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -1227,8 +1287,8 @@ class ServerUsersApi:
     @validate_call
     def search_users_without_preload_content(
         self,
-        limit: Optional[StrictInt] = None,
-        cursor: Optional[UUID] = None,
+        limit: Annotated[Optional[StrictInt], Field(description="Maximum number of items in the returned page (default 20).")] = None,
+        cursor: Annotated[Optional[UUID], Field(description="Opaque cursor returned by the previous page's `nextCursor`. Omit to fetch the first page.")] = None,
         server_user_search_request: Optional[ServerUserSearchRequest] = None,
         _request_timeout: Union[
             None,
@@ -1245,10 +1305,11 @@ class ServerUsersApi:
     ) -> RESTResponseType:
         """Search users
 
+        Returns a cursor-paginated page of end-users in the environment matching the optional filters. Filters use the same tri-state PATCH semantics as `UpdateUserRequest`: omit a field to skip that filter, send a value to require it, send null to require null. Uses POST so the filter body can be sent without URL-encoding.
 
-        :param limit:
+        :param limit: Maximum number of items in the returned page (default 20).
         :type limit: int
-        :param cursor:
+        :param cursor: Opaque cursor returned by the previous page's `nextCursor`. Omit to fetch the first page.
         :type cursor: UUID
         :param server_user_search_request:
         :type server_user_search_request: ServerUserSearchRequest
@@ -1286,6 +1347,7 @@ class ServerUsersApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "CursorPageResponseUserResponse",
+            '401': "ProblemDetail",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -1340,7 +1402,8 @@ class ServerUsersApi:
         if 'Accept' not in _header_params:
             _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    'application/json', 
+                    'application/problem+json'
                 ]
             )
 
@@ -1383,7 +1446,7 @@ class ServerUsersApi:
     @validate_call
     def unban_user(
         self,
-        user_id: UUID,
+        user_id: Annotated[UUID, Field(description="Identifier of the user to unban.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1399,8 +1462,9 @@ class ServerUsersApi:
     ) -> UserResponse:
         """Unban user
 
+        Reverses a previous ban. The user can sign in again on next request.
 
-        :param user_id: (required)
+        :param user_id: Identifier of the user to unban. (required)
         :type user_id: UUID
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -1434,6 +1498,9 @@ class ServerUsersApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "UserResponse",
+            '401': "ProblemDetail",
+            '403': "ProblemDetail",
+            '404': "ProblemDetail",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -1449,7 +1516,7 @@ class ServerUsersApi:
     @validate_call
     def unban_user_with_http_info(
         self,
-        user_id: UUID,
+        user_id: Annotated[UUID, Field(description="Identifier of the user to unban.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1465,8 +1532,9 @@ class ServerUsersApi:
     ) -> ApiResponse[UserResponse]:
         """Unban user
 
+        Reverses a previous ban. The user can sign in again on next request.
 
-        :param user_id: (required)
+        :param user_id: Identifier of the user to unban. (required)
         :type user_id: UUID
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -1500,6 +1568,9 @@ class ServerUsersApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "UserResponse",
+            '401': "ProblemDetail",
+            '403': "ProblemDetail",
+            '404': "ProblemDetail",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -1515,7 +1586,7 @@ class ServerUsersApi:
     @validate_call
     def unban_user_without_preload_content(
         self,
-        user_id: UUID,
+        user_id: Annotated[UUID, Field(description="Identifier of the user to unban.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1531,8 +1602,9 @@ class ServerUsersApi:
     ) -> RESTResponseType:
         """Unban user
 
+        Reverses a previous ban. The user can sign in again on next request.
 
-        :param user_id: (required)
+        :param user_id: Identifier of the user to unban. (required)
         :type user_id: UUID
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -1566,6 +1638,9 @@ class ServerUsersApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "UserResponse",
+            '401': "ProblemDetail",
+            '403': "ProblemDetail",
+            '404': "ProblemDetail",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -1610,7 +1685,8 @@ class ServerUsersApi:
         if 'Accept' not in _header_params:
             _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    'application/json', 
+                    'application/problem+json'
                 ]
             )
 
@@ -1640,7 +1716,7 @@ class ServerUsersApi:
     @validate_call
     def update_user(
         self,
-        user_id: UUID,
+        user_id: Annotated[UUID, Field(description="Identifier of the user to update.")],
         update_user_request: UpdateUserRequest,
         _request_timeout: Union[
             None,
@@ -1657,8 +1733,9 @@ class ServerUsersApi:
     ) -> UserResponse:
         """Update user
 
+        Partial update with tri-state PATCH semantics. Every field in `UpdateUserRequest` is tri-state: omit the key to leave the field unchanged, send a non-null value to set it, or send JSON null to clear it.
 
-        :param user_id: (required)
+        :param user_id: Identifier of the user to update. (required)
         :type user_id: UUID
         :param update_user_request: (required)
         :type update_user_request: UpdateUserRequest
@@ -1695,6 +1772,10 @@ class ServerUsersApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "UserResponse",
+            '400': "ProblemDetail",
+            '401': "ProblemDetail",
+            '403': "ProblemDetail",
+            '404': "ProblemDetail",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -1710,7 +1791,7 @@ class ServerUsersApi:
     @validate_call
     def update_user_with_http_info(
         self,
-        user_id: UUID,
+        user_id: Annotated[UUID, Field(description="Identifier of the user to update.")],
         update_user_request: UpdateUserRequest,
         _request_timeout: Union[
             None,
@@ -1727,8 +1808,9 @@ class ServerUsersApi:
     ) -> ApiResponse[UserResponse]:
         """Update user
 
+        Partial update with tri-state PATCH semantics. Every field in `UpdateUserRequest` is tri-state: omit the key to leave the field unchanged, send a non-null value to set it, or send JSON null to clear it.
 
-        :param user_id: (required)
+        :param user_id: Identifier of the user to update. (required)
         :type user_id: UUID
         :param update_user_request: (required)
         :type update_user_request: UpdateUserRequest
@@ -1765,6 +1847,10 @@ class ServerUsersApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "UserResponse",
+            '400': "ProblemDetail",
+            '401': "ProblemDetail",
+            '403': "ProblemDetail",
+            '404': "ProblemDetail",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -1780,7 +1866,7 @@ class ServerUsersApi:
     @validate_call
     def update_user_without_preload_content(
         self,
-        user_id: UUID,
+        user_id: Annotated[UUID, Field(description="Identifier of the user to update.")],
         update_user_request: UpdateUserRequest,
         _request_timeout: Union[
             None,
@@ -1797,8 +1883,9 @@ class ServerUsersApi:
     ) -> RESTResponseType:
         """Update user
 
+        Partial update with tri-state PATCH semantics. Every field in `UpdateUserRequest` is tri-state: omit the key to leave the field unchanged, send a non-null value to set it, or send JSON null to clear it.
 
-        :param user_id: (required)
+        :param user_id: Identifier of the user to update. (required)
         :type user_id: UUID
         :param update_user_request: (required)
         :type update_user_request: UpdateUserRequest
@@ -1835,6 +1922,10 @@ class ServerUsersApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "UserResponse",
+            '400': "ProblemDetail",
+            '401': "ProblemDetail",
+            '403': "ProblemDetail",
+            '404': "ProblemDetail",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -1882,7 +1973,8 @@ class ServerUsersApi:
         if 'Accept' not in _header_params:
             _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    'application/json', 
+                    'application/problem+json'
                 ]
             )
 
