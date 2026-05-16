@@ -1,29 +1,47 @@
 # torii-backend
 
-Backend SDK for [torii](https://torii.so) — verify end-user JWTs without a per-request round trip, manage users from your Python server, react to events from torii.
+Backend SDK for [torii](https://torii.so) — verify end-user JWTs without a per-request round trip and manage users from your Python server.
 
-> **Status: 0.0.x preview.** Stable for verify + users + sessions. Outbound webhooks (`verify_webhook`) is a stub that raises until torii's webhook subsystem ships (tracked in [Torii-ApS/torii#424](https://github.com/Torii-ApS/torii/issues/424) Phase 0.5).
+> **v0.x — API may still change.**
 
-## Install
+## Setup
 
-```sh
-pip install torii-backend
-# or, with the FastAPI dependency adapter:
-pip install "torii-backend[fastapi]"
-```
+1. Sign in to [app.torii.so](https://app.torii.so) and from your dashboard copy:
+   - your **issuer URL** (e.g. `https://acme.torii.so`)
+   - a **secret key** (`sk_test_…` for development, `sk_live_…` for production)
 
-Python 3.9+.
+2. Install the SDK:
 
-## Verify a JWT
+   ```sh
+   pip install torii-backend
+   # or, with the FastAPI dependency adapter:
+   pip install "torii-backend[fastapi]"
+   ```
 
-```python
-from torii_backend import verify_token
+   Python 3.9+.
 
-auth = verify_token(token, issuer="https://acme.torii.so")  # or your verified custom domain
-print(auth.user_id, auth.environment_id, auth.email_verified)
-```
+3. Verify an end-user JWT:
 
-The first call fetches the issuer's JWKS; subsequent calls reuse the cache and rotate keys automatically (handled by [`PyJWT`](https://pyjwt.readthedocs.io/)). No network round trip per request.
+   ```python
+   from torii_backend import verify_token
+
+   auth = verify_token(token, issuer="https://acme.torii.so")
+   print(auth.user_id, auth.environment_id, auth.email_verified)
+   ```
+
+   The first call fetches the issuer's JWKS; subsequent calls reuse the cache and rotate keys automatically (handled by [`PyJWT`](https://pyjwt.readthedocs.io/)). No round trip per request.
+
+4. Call the backend REST API:
+
+   ```python
+   import os
+   from torii_backend import create_torii_client
+
+   torii = create_torii_client(secret_key=os.environ["TORII_SECRET_KEY"])
+   user = torii.users.get(user_id)
+   ```
+
+   Default base URL is `https://api.torii.so`. Override with `api_url=` for staging or self-hosted.
 
 ## FastAPI
 
@@ -42,11 +60,6 @@ def me(auth = Depends(auth_dep)):
 ## Backend API
 
 ```python
-import os
-from torii_backend import create_torii_client
-
-torii = create_torii_client(secret_key=os.environ["TORII_SECRET_KEY"])
-
 page = torii.users.list(limit=50)
 user = torii.users.create(email="x@y.com")
 torii.users.ban(user.id)
@@ -54,8 +67,6 @@ torii.users.ban(user.id)
 sessions = torii.sessions.list_for_user(user.id)
 torii.sessions.revoke_all_for_user(user.id)
 ```
-
-Default base URL is `https://api.torii.so`. Override with `api_url` for staging or self-hosted.
 
 ### PATCH semantics (`users.update`)
 
@@ -89,14 +100,6 @@ from torii_backend import ToriiUpdateUserInput
 
 patch = ToriiUpdateUserInput(name="Ada", phone=None)
 torii.users.update(user_id, patch)
-```
-
-## Verify outbound webhooks
-
-```python
-from torii_backend import verify_webhook  # currently raises; awaiting Phase 0.5
-
-event = verify_webhook(secret=secret, headers=request.headers, payload=request.body)
 ```
 
 ## License

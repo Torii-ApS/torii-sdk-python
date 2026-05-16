@@ -5,10 +5,9 @@ behind a thin, hand-written facade so callers see ergonomic methods
 instead of the generator's verbose ``_request_timeout``/``_headers``/...
 parameter sprawl.
 
-Per the design philosophy in #424: types + endpoints come from the
-OpenAPI spec via ``openapi-generator``; only the wrapper + auth helpers
-are hand-written. When the spec grows, regenerate and add a one-line
-wrapper method per new endpoint.
+Types and endpoints come from the OpenAPI spec via ``openapi-generator``;
+only the wrapper + auth helpers are hand-written. When the spec grows,
+regenerate and add a one-line wrapper method per new endpoint.
 """
 
 from __future__ import annotations
