@@ -1,0 +1,70 @@
+name: Release
+
+# Tag-triggered PyPI publish via OIDC trusted publishing.
+#
+# Prerequisites (one-time, see torii repo docs/Publishing-SDKs.md):
+#   1. pypi.org → "Your projects" → "Publishing" → Add pending publisher
+#      (or, after first publish, regular trusted publisher) with:
+#        - PyPI project name: torii-backend
+#        - Owner: Torii-ApS
+#        - Repository: torii-sdk-python
+#        - Workflow: release.yml
+#        - Environment: pypi
+#   2. GitHub repo → Settings → Environments → create `pypi` with required
+#      reviewers for manual approval before publish.
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write     # for GH release creation
+  id-token: write     # required for OIDC trusted publishing
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    environment: pypi
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Assert tag matches pyproject.toml version
+        run: |
+          PKG_VERSION=$(python -c "import tomllib, pathlib; print(tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['version'])")
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          if [ "$PKG_VERSION" != "$TAG_VERSION" ]; then
+            echo "Tag ${GITHUB_REF_NAME} does not match pyproject.toml version ${PKG_VERSION}" >&2
+            exit 1
+          fi
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Test on tagged SHA
+        run: |
+          uv venv
+          uv pip install -e ".[dev]"
+          .venv/bin/pytest -q
+
+      - name: Build sdist + wheel
+        run: |
+          python -m pip install --upgrade build
+          python -m build
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        # No `with: password` — OIDC trusted publisher exchanges the
+        # GitHub-issued ID token for a short-lived PyPI upload token.
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            --title "${GITHUB_REF_NAME}" \
+            --generate-notes
