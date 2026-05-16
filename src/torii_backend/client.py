@@ -13,6 +13,7 @@ wrapper method per new endpoint.
 
 from __future__ import annotations
 
+from datetime import date, datetime
 from typing import Any
 from uuid import UUID
 
@@ -33,6 +34,12 @@ from torii_backend.generated.models import (
     UserSessionResponse,
 )
 
+# Sentinel to distinguish "argument not passed" from "explicit None" in the
+# keyword-arg flavour of ``users.update`` / ``users.create``. We must NOT use
+# ``None`` for this purpose because PATCH semantics require ``None`` to mean
+# "clear this field on the server". See README "PATCH semantics".
+_UNSET: Any = object()
+
 DEFAULT_API_URL = "https://api.torii.so"
 
 
@@ -45,11 +52,11 @@ class UsersClient:
         *,
         limit: int | None = None,
         cursor: str | UUID | None = None,
-        name: Any = None,
-        email: Any = None,
-        statuses: Any = None,
-        created_after: str | None = None,
-        created_before: str | None = None,
+        name: str | None = None,
+        email: str | None = None,
+        statuses: list[str] | None = None,
+        created_after: str | datetime | None = None,
+        created_before: str | datetime | None = None,
     ) -> CursorPageResponseUserResponse:
         """Search users. Server-side cursor-paginated; loop with the
         returned ``next_cursor`` until ``has_more`` is False."""
@@ -73,25 +80,115 @@ class UsersClient:
         with _translate_api_error():
             return self._api.get_user(_coerce_uuid(user_id))
 
-    def create(self, input: CreateUserRequest | dict[str, Any]) -> UserResponse:
-        body = (
-            input
-            if isinstance(input, CreateUserRequest)
-            else CreateUserRequest.from_dict(input)
-        )
+    def create(
+        self,
+        input: CreateUserRequest | dict[str, Any] | None = None,
+        *,
+        email: str | None = _UNSET,
+        password: str | None = _UNSET,
+        name: str | None = _UNSET,
+        phone: str | None = _UNSET,
+        address: str | None = _UNSET,
+        date_of_birth: str | date | None = _UNSET,
+    ) -> UserResponse:
+        """Create a user.
+
+        Two call shapes:
+          * Pass a ``CreateUserRequest`` / dict positionally; OR
+          * Pass keyword args directly (``email=...``, ``name=...``, etc.).
+        """
+        if input is not None:
+            body = (
+                input
+                if isinstance(input, CreateUserRequest)
+                else CreateUserRequest.from_dict(input)
+            )
+        else:
+            kwargs = {
+                "email": email,
+                "password": password,
+                "name": name,
+                "phone": phone,
+                "address": address,
+                "dateOfBirth": date_of_birth,
+            }
+            body = CreateUserRequest.model_validate(
+                {k: v for k, v in kwargs.items() if v is not _UNSET}
+            )
         with _translate_api_error():
             return self._api.create_user(body)
 
     def update(
-        self, user_id: str | UUID, input: UpdateUserRequest | dict[str, Any]
+        self,
+        user_id: str | UUID,
+        input: UpdateUserRequest | dict[str, Any] | None = None,
+        *,
+        name: str | None = _UNSET,
+        phone: str | None = _UNSET,
+        avatar_url: str | None = _UNSET,
+        locale: str | None = _UNSET,
+        address: str | None = _UNSET,
+        date_of_birth: str | date | None = _UNSET,
     ) -> UserResponse:
-        body = (
-            input
-            if isinstance(input, UpdateUserRequest)
-            else UpdateUserRequest.from_dict(input)
-        )
+        """Patch a user.
+
+        Tri-state PATCH semantics — only fields the caller explicitly set
+        are sent to the server:
+          * not passed → omitted from the JSON body → server leaves alone
+          * ``None``   → emitted as ``null``        → server clears
+          * value      → emitted with value         → server updates
+
+        Two call shapes:
+          * Pass an ``UpdateUserRequest`` / dict positionally; the request
+            model's ``model_fields_set`` drives which keys are sent; OR
+          * Pass keyword args directly (``name="Ada"``, ``phone=None``, ...).
+            Only the kwargs you pass appear on the wire.
+        """
+        if input is not None:
+            model = (
+                input
+                if isinstance(input, UpdateUserRequest)
+                else UpdateUserRequest.model_validate(input)
+            )
+        else:
+            kwargs = {
+                "name": name,
+                "phone": phone,
+                "avatarUrl": avatar_url,
+                "locale": locale,
+                "address": address,
+                "dateOfBirth": date_of_birth,
+            }
+            model = UpdateUserRequest.model_validate(
+                {k: v for k, v in kwargs.items() if v is not _UNSET}
+            )
+        # Build the wire body from the model's *explicitly set* fields only.
+        # We must NOT pass the model through the generated ``update_user`` —
+        # it's wrapped in pydantic's ``@validate_call`` which would re-coerce
+        # the dict back into an ``UpdateUserRequest`` and then serialize via
+        # ``to_dict()`` (which uses ``exclude_none=True``). That collapses
+        # ``phone=None`` ("clear this field") into "omit", breaking tri-state.
+        # Drop down to the serializer + ``call_api`` directly so the dict we
+        # built survives untouched.
+        body = model.model_dump(exclude_unset=True, by_alias=True)
         with _translate_api_error():
-            return self._api.update_user(_coerce_uuid(user_id), body)
+            return self._patch_user(_coerce_uuid(user_id), body)
+
+    def _patch_user(self, user_id: Any, body: dict[str, Any]) -> UserResponse:
+        params = self._api._update_user_serialize(
+            user_id=user_id,
+            update_user_request=body,
+            _request_auth=None,
+            _content_type=None,
+            _headers=None,
+            _host_index=0,
+        )
+        response = self._api.api_client.call_api(*params)
+        response.read()
+        return self._api.api_client.response_deserialize(
+            response_data=response,
+            response_types_map={"200": "UserResponse"},
+        ).data
 
     def delete(self, user_id: str | UUID) -> None:
         with _translate_api_error():

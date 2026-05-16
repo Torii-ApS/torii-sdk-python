@@ -31,10 +31,7 @@ __all__ = [
     "ApiException",
     "CreateUserRequest",
     "CursorPageResponseUserResponse",
-    "Included",
-    "NotIncluded",
     "ServerUserSearchRequest",
-    "ServerUserSearchRequestName",
     "UpdateUserRequest",
     "UserResponse",
     "UserSessionResponse",
@@ -58,10 +55,7 @@ from torii_backend.generated.exceptions import ApiException as ApiException
 # import models into sdk package
 from torii_backend.generated.models.create_user_request import CreateUserRequest as CreateUserRequest
 from torii_backend.generated.models.cursor_page_response_user_response import CursorPageResponseUserResponse as CursorPageResponseUserResponse
-from torii_backend.generated.models.included import Included as Included
-from torii_backend.generated.models.not_included import NotIncluded as NotIncluded
 from torii_backend.generated.models.server_user_search_request import ServerUserSearchRequest as ServerUserSearchRequest
-from torii_backend.generated.models.server_user_search_request_name import ServerUserSearchRequestName as ServerUserSearchRequestName
 from torii_backend.generated.models.update_user_request import UpdateUserRequest as UpdateUserRequest
 from torii_backend.generated.models.user_response import UserResponse as UserResponse
 from torii_backend.generated.models.user_session_response import UserSessionResponse as UserSessionResponse

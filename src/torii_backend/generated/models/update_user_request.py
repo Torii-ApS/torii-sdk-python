@@ -17,9 +17,9 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field
-from typing import Any, ClassVar, Dict, List
-from torii_backend.generated.models.server_user_search_request_name import ServerUserSearchRequestName
+from datetime import date
+from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
+from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 from pydantic_core import to_jsonable_python
@@ -28,13 +28,23 @@ class UpdateUserRequest(BaseModel):
     """
     UpdateUserRequest
     """ # noqa: E501
-    name: ServerUserSearchRequestName
-    phone: ServerUserSearchRequestName
-    avatar_url: ServerUserSearchRequestName = Field(alias="avatarUrl")
-    locale: ServerUserSearchRequestName
-    address: ServerUserSearchRequestName
-    date_of_birth: ServerUserSearchRequestName = Field(alias="dateOfBirth")
+    name: Optional[StrictStr] = None
+    phone: Optional[StrictStr] = None
+    avatar_url: Optional[StrictStr] = Field(default=None, alias="avatarUrl")
+    locale: Optional[StrictStr] = None
+    address: Optional[StrictStr] = None
+    date_of_birth: Optional[date] = Field(default=None, alias="dateOfBirth")
     __properties: ClassVar[List[str]] = ["name", "phone", "avatarUrl", "locale", "address", "dateOfBirth"]
+
+    @field_validator('locale')
+    def locale_validate_enum(cls, value):
+        """Validates the enum"""
+        if value is None:
+            return value
+
+        if value not in set(['en', 'da']):
+            raise ValueError("must be one of enum values ('en', 'da')")
+        return value
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -75,24 +85,6 @@ class UpdateUserRequest(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of name
-        if self.name:
-            _dict['name'] = self.name.to_dict()
-        # override the default output from pydantic by calling `to_dict()` of phone
-        if self.phone:
-            _dict['phone'] = self.phone.to_dict()
-        # override the default output from pydantic by calling `to_dict()` of avatar_url
-        if self.avatar_url:
-            _dict['avatarUrl'] = self.avatar_url.to_dict()
-        # override the default output from pydantic by calling `to_dict()` of locale
-        if self.locale:
-            _dict['locale'] = self.locale.to_dict()
-        # override the default output from pydantic by calling `to_dict()` of address
-        if self.address:
-            _dict['address'] = self.address.to_dict()
-        # override the default output from pydantic by calling `to_dict()` of date_of_birth
-        if self.date_of_birth:
-            _dict['dateOfBirth'] = self.date_of_birth.to_dict()
         return _dict
 
     @classmethod
@@ -105,12 +97,12 @@ class UpdateUserRequest(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "name": ServerUserSearchRequestName.from_dict(obj["name"]) if obj.get("name") is not None else None,
-            "phone": ServerUserSearchRequestName.from_dict(obj["phone"]) if obj.get("phone") is not None else None,
-            "avatarUrl": ServerUserSearchRequestName.from_dict(obj["avatarUrl"]) if obj.get("avatarUrl") is not None else None,
-            "locale": ServerUserSearchRequestName.from_dict(obj["locale"]) if obj.get("locale") is not None else None,
-            "address": ServerUserSearchRequestName.from_dict(obj["address"]) if obj.get("address") is not None else None,
-            "dateOfBirth": ServerUserSearchRequestName.from_dict(obj["dateOfBirth"]) if obj.get("dateOfBirth") is not None else None
+            "name": obj.get("name"),
+            "phone": obj.get("phone"),
+            "avatarUrl": obj.get("avatarUrl"),
+            "locale": obj.get("locale"),
+            "address": obj.get("address"),
+            "dateOfBirth": obj.get("dateOfBirth")
         })
         return _obj
 
