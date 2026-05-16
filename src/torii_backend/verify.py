@@ -141,15 +141,12 @@ def verify_webhook(
 
     .. warning::
 
-       torii's outbound webhook subsystem hasn't shipped yet (tracked in
-       `GitHub issue #424 <https://github.com/Torii-ApS/torii/issues/424>`_
-       Phase 0.5). This stub keeps the SDK surface stable so adopting it
-       later won't be a breaking change for callers.
+       torii's outbound webhook subsystem is not yet available. This stub
+       reserves the SDK surface so adopting it later won't be a breaking
+       change for callers.
     """
     raise ToriiAuthError(
-        "verify_webhook: torii's outbound webhook subsystem has not shipped yet. "
-        "This stub keeps the SDK surface stable so adopting it later doesn't break callers. "
-        "Track progress on GitHub issue #424 (Phase 0.5).",
+        "verify_webhook: torii's outbound webhook subsystem is not yet available.",
     )
 
 
