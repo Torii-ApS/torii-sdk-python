@@ -65,6 +65,11 @@ python_version = "3.9"
 strict = true
 warn_unused_ignores = true
 warn_redundant_casts = true
+exclude = ["src/torii_backend/generated/"]
+
+[[tool.mypy.overrides]]
+module = "torii_backend.generated.*"
+ignore_errors = true
 
 [[tool.mypy.overrides]]
 module = "tests.*"
