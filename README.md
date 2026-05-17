@@ -41,8 +41,6 @@ Backend SDK for [torii](https://torii.so) — verify end-user JWTs without a per
    user = torii.users.get(user_id)
    ```
 
-   Default base URL is `https://api.torii.so`. Override with `api_url=` for staging or testing environments.
-
 ## FastAPI
 
 ```python
