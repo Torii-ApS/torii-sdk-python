@@ -33,7 +33,6 @@ class UserResponse(BaseModel):
     environment_id: UUID = Field(description="Identifier of the environment this user belongs to.", alias="environmentId")
     name: Optional[StrictStr] = Field(default=None, description="Full name on the profile, if any.")
     phone: Optional[StrictStr] = Field(default=None, description="Phone number on the profile, if any. Not guaranteed to be verified.")
-    avatar_url: Optional[StrictStr] = Field(default=None, description="URL of the user's avatar image, if any.", alias="avatarUrl")
     locale: Optional[StrictStr] = Field(default=None, description="Preferred locale for emails and UI messages.")
     address: Optional[StrictStr] = Field(default=None, description="Free-form address string, if provided.")
     date_of_birth: Optional[date] = Field(default=None, description="Date of birth in ISO-8601 (YYYY-MM-DD), if provided.", alias="dateOfBirth")
@@ -42,7 +41,7 @@ class UserResponse(BaseModel):
     updated_at: datetime = Field(description="When this user was last modified (ISO-8601 UTC).", alias="updatedAt")
     email: Optional[StrictStr] = Field(default=None, description="Primary email on the profile, if any. Not guaranteed to be verified.")
     deleted_at: Optional[datetime] = Field(default=None, description="When this user was deleted, if soft-deleted. Null for active users.", alias="deletedAt")
-    __properties: ClassVar[List[str]] = ["id", "environmentId", "name", "phone", "avatarUrl", "locale", "address", "dateOfBirth", "status", "createdAt", "updatedAt", "email", "deletedAt"]
+    __properties: ClassVar[List[str]] = ["id", "environmentId", "name", "phone", "locale", "address", "dateOfBirth", "status", "createdAt", "updatedAt", "email", "deletedAt"]
 
     @field_validator('locale')
     def locale_validate_enum(cls, value):
@@ -110,11 +109,6 @@ class UserResponse(BaseModel):
         if self.phone is None and "phone" in self.model_fields_set:
             _dict['phone'] = None
 
-        # set to None if avatar_url (nullable) is None
-        # and model_fields_set contains the field
-        if self.avatar_url is None and "avatar_url" in self.model_fields_set:
-            _dict['avatarUrl'] = None
-
         # set to None if locale (nullable) is None
         # and model_fields_set contains the field
         if self.locale is None and "locale" in self.model_fields_set:
@@ -156,7 +150,6 @@ class UserResponse(BaseModel):
             "environmentId": obj.get("environmentId"),
             "name": obj.get("name"),
             "phone": obj.get("phone"),
-            "avatarUrl": obj.get("avatarUrl"),
             "locale": obj.get("locale"),
             "address": obj.get("address"),
             "dateOfBirth": obj.get("dateOfBirth"),

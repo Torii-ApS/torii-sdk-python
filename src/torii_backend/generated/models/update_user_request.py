@@ -30,11 +30,10 @@ class UpdateUserRequest(BaseModel):
     """ # noqa: E501
     name: Optional[StrictStr] = Field(default=None, description="New display name. Send null to clear; omit to leave unchanged.")
     phone: Optional[StrictStr] = Field(default=None, description="New phone number. Send null to clear; omit to leave unchanged.")
-    avatar_url: Optional[StrictStr] = Field(default=None, description="New avatar URL. Send null to clear; omit to leave unchanged.", alias="avatarUrl")
     locale: Optional[StrictStr] = Field(default=None, description="New preferred locale. Send null to clear; omit to leave unchanged.")
     address: Optional[StrictStr] = Field(default=None, description="New postal address. Send null to clear; omit to leave unchanged.")
     date_of_birth: Optional[date] = Field(default=None, description="New date of birth (YYYY-MM-DD). Send null to clear; omit to leave unchanged.", alias="dateOfBirth")
-    __properties: ClassVar[List[str]] = ["name", "phone", "avatarUrl", "locale", "address", "dateOfBirth"]
+    __properties: ClassVar[List[str]] = ["name", "phone", "locale", "address", "dateOfBirth"]
 
     @field_validator('locale')
     def locale_validate_enum(cls, value):
@@ -95,11 +94,6 @@ class UpdateUserRequest(BaseModel):
         if self.phone is None and "phone" in self.model_fields_set:
             _dict['phone'] = None
 
-        # set to None if avatar_url (nullable) is None
-        # and model_fields_set contains the field
-        if self.avatar_url is None and "avatar_url" in self.model_fields_set:
-            _dict['avatarUrl'] = None
-
         # set to None if locale (nullable) is None
         # and model_fields_set contains the field
         if self.locale is None and "locale" in self.model_fields_set:
@@ -129,7 +123,6 @@ class UpdateUserRequest(BaseModel):
         _obj = cls.model_validate({
             "name": obj.get("name"),
             "phone": obj.get("phone"),
-            "avatarUrl": obj.get("avatarUrl"),
             "locale": obj.get("locale"),
             "address": obj.get("address"),
             "dateOfBirth": obj.get("dateOfBirth")

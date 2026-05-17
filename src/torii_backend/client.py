@@ -124,7 +124,6 @@ class UsersClient:
         *,
         name: str | None = _UNSET,
         phone: str | None = _UNSET,
-        avatar_url: str | None = _UNSET,
         locale: str | None = _UNSET,
         address: str | None = _UNSET,
         date_of_birth: str | date | None = _UNSET,
@@ -153,7 +152,6 @@ class UsersClient:
             kwargs = {
                 "name": name,
                 "phone": phone,
-                "avatarUrl": avatar_url,
                 "locale": locale,
                 "address": address,
                 "dateOfBirth": date_of_birth,

@@ -26,10 +26,10 @@ from pydantic_core import to_jsonable_python
 
 class ServerUserSearchRequest(BaseModel):
     """
-    Optional filter body for `POST /users/search`. Every field is tri-state: omit to skip that filter, send a value to require it, send JSON null to require null.
+    Optional filter body for `POST /users/search`. Every field is tri-state: omit to skip that filter, send a value to require it. Fields whose inner type is nullable (currently `name`, `email`) additionally accept JSON null to filter for users where that column is null; the non-nullable `statuses` field rejects null.
     """ # noqa: E501
-    name: Optional[StrictStr] = Field(default=None, description="Filter by name (exact match). Send null to require users with no name.")
-    email: Optional[StrictStr] = Field(default=None, description="Filter by primary email (exact match). Send null to require users with no email.")
+    name: Optional[StrictStr] = Field(default=None, description="Filter by name (case-insensitive substring match). Send null to require users with no name.")
+    email: Optional[StrictStr] = Field(default=None, description="Filter by primary email (case-insensitive substring match). Send null to require users with no email.")
     statuses: Optional[List[StrictStr]] = Field(default=None, description="Filter by user status. Returns users matching any of the supplied statuses.")
     created_after: Optional[datetime] = Field(default=None, description="Only return users created at or after this instant (ISO-8601 UTC).", alias="createdAfter")
     created_before: Optional[datetime] = Field(default=None, description="Only return users created at or before this instant (ISO-8601 UTC).", alias="createdBefore")

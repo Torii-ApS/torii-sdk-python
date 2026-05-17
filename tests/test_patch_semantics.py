@@ -12,6 +12,7 @@ as the source of truth — no wrapper class needed.
 from __future__ import annotations
 
 import json
+from datetime import date
 from typing import Any
 from unittest.mock import MagicMock
 from uuid import uuid4
@@ -46,14 +47,14 @@ def test_mixed() -> None:
     assert body == {"name": "Ada", "phone": None}
 
 
-def test_alias_emitted_for_avatar_url() -> None:
-    body = _dump(UpdateUserRequest(avatar_url="https://x/y.png"))
-    assert body == {"avatarUrl": "https://x/y.png"}
+def test_alias_emitted_for_date_of_birth() -> None:
+    body = _dump(UpdateUserRequest(date_of_birth="1990-01-01"))
+    assert body == {"dateOfBirth": date(1990, 1, 1)}
 
 
-def test_alias_clear_for_avatar_url() -> None:
-    body = _dump(UpdateUserRequest(avatar_url=None))
-    assert body == {"avatarUrl": None}
+def test_alias_clear_for_date_of_birth() -> None:
+    body = _dump(UpdateUserRequest(date_of_birth=None))
+    assert body == {"dateOfBirth": None}
 
 
 def test_model_fields_set_tracks_explicit_only() -> None:
@@ -128,11 +129,11 @@ def test_users_update_wire_body_omit() -> None:
 def test_users_update_wire_body_mixed_with_alias() -> None:
     torii = create_torii_client(secret_key="sk_test")
     captured = _install_capture(torii)
-    torii.users.update(uuid4(), name="Ada", phone=None, avatar_url="https://x/y.png")
+    torii.users.update(uuid4(), name="Ada", phone=None, date_of_birth=date(1990, 1, 1))
     assert json.loads(captured["body"]) == {
         "name": "Ada",
         "phone": None,
-        "avatarUrl": "https://x/y.png",
+        "dateOfBirth": "1990-01-01",
     }
 
 

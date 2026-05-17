@@ -615,7 +615,7 @@ class ServerUsersApi:
     ) -> None:
         """Delete user
 
-        Soft-deletes the user. Idempotent: returns 204 even if the user was already deleted.
+        Soft-deletes the user. Not idempotent at the HTTP layer: the authorization grant for the user is revoked on the first successful delete, so a subsequent DELETE for the same id returns 403 rather than 204. Treat 403 from a retry as a confirmation that the user is already deleted.
 
         :param user_id: Identifier of the user to delete. (required)
         :type user_id: UUID
@@ -653,6 +653,7 @@ class ServerUsersApi:
             '204': None,
             '401': "ProblemDetail",
             '403': "ProblemDetail",
+            '404': "ProblemDetail",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -684,7 +685,7 @@ class ServerUsersApi:
     ) -> ApiResponse[None]:
         """Delete user
 
-        Soft-deletes the user. Idempotent: returns 204 even if the user was already deleted.
+        Soft-deletes the user. Not idempotent at the HTTP layer: the authorization grant for the user is revoked on the first successful delete, so a subsequent DELETE for the same id returns 403 rather than 204. Treat 403 from a retry as a confirmation that the user is already deleted.
 
         :param user_id: Identifier of the user to delete. (required)
         :type user_id: UUID
@@ -722,6 +723,7 @@ class ServerUsersApi:
             '204': None,
             '401': "ProblemDetail",
             '403': "ProblemDetail",
+            '404': "ProblemDetail",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -753,7 +755,7 @@ class ServerUsersApi:
     ) -> RESTResponseType:
         """Delete user
 
-        Soft-deletes the user. Idempotent: returns 204 even if the user was already deleted.
+        Soft-deletes the user. Not idempotent at the HTTP layer: the authorization grant for the user is revoked on the first successful delete, so a subsequent DELETE for the same id returns 403 rather than 204. Treat 403 from a retry as a confirmation that the user is already deleted.
 
         :param user_id: Identifier of the user to delete. (required)
         :type user_id: UUID
@@ -791,6 +793,7 @@ class ServerUsersApi:
             '204': None,
             '401': "ProblemDetail",
             '403': "ProblemDetail",
+            '404': "ProblemDetail",
         }
         response_data = self.api_client.call_api(
             *_param,
