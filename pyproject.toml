@@ -5,7 +5,7 @@ description = "Backend SDK for torii — verify JWTs, manage users, react to eve
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }
-authors = [{ name = "GOOD Code ApS" }]
+authors = [{ name = "Torii ApS" }]
 keywords = ["torii", "auth", "jwt", "oidc", "backend"]
 classifiers = [
     "Development Status :: 3 - Alpha",
