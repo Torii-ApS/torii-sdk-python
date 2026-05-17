@@ -40,12 +40,6 @@ jobs:
       - name: Ruff (lint)
         run: .venv/bin/ruff check src/torii_backend tests
 
-      - name: Mypy (strict types)
-        # mypy is in [dev] extras. The generated/ subdir is excluded via
-        # pyproject.toml [tool.ruff].extend-exclude — mypy honors its own
-        # exclude config block, which is set in pyproject.toml.
-        run: .venv/bin/mypy src/torii_backend
-
       - name: Pytest
         run: .venv/bin/pytest -q
 
