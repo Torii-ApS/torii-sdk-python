@@ -42,8 +42,8 @@ class ServerUserSearchRequest(BaseModel):
             return value
 
         for i in value:
-            if i not in set(['pending_verification', 'active', 'banned', 'deleted']):
-                raise ValueError("each list item must be one of ('pending_verification', 'active', 'banned', 'deleted')")
+            if i not in set(['active', 'banned', 'deleted']):
+                raise ValueError("each list item must be one of ('active', 'banned', 'deleted')")
         return value
 
     model_config = ConfigDict(
