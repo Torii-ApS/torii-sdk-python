@@ -37,7 +37,8 @@ class UserSessionResponse(BaseModel):
     created_at: datetime = Field(description="When this session was created (ISO-8601 UTC).", alias="createdAt")
     expires_at: datetime = Field(description="When this session expires (ISO-8601 UTC).", alias="expiresAt")
     last_used_at: datetime = Field(description="When this session was last seen by the API (ISO-8601 UTC).", alias="lastUsedAt")
-    __properties: ClassVar[List[str]] = ["id", "userId", "environmentId", "userAgent", "ipAddress", "createdAt", "expiresAt", "lastUsedAt"]
+    active_organization_id: Optional[UUID] = Field(default=None, description="Active organization pinned to this session (`org_id` claim on re-mint).", alias="activeOrganizationId")
+    __properties: ClassVar[List[str]] = ["id", "userId", "environmentId", "userAgent", "ipAddress", "createdAt", "expiresAt", "lastUsedAt", "activeOrganizationId"]
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -88,6 +89,11 @@ class UserSessionResponse(BaseModel):
         if self.ip_address is None and "ip_address" in self.model_fields_set:
             _dict['ipAddress'] = None
 
+        # set to None if active_organization_id (nullable) is None
+        # and model_fields_set contains the field
+        if self.active_organization_id is None and "active_organization_id" in self.model_fields_set:
+            _dict['activeOrganizationId'] = None
+
         return _dict
 
     @classmethod
@@ -107,7 +113,8 @@ class UserSessionResponse(BaseModel):
             "ipAddress": obj.get("ipAddress"),
             "createdAt": obj.get("createdAt"),
             "expiresAt": obj.get("expiresAt"),
-            "lastUsedAt": obj.get("lastUsedAt")
+            "lastUsedAt": obj.get("lastUsedAt"),
+            "activeOrganizationId": obj.get("activeOrganizationId")
         })
         return _obj
 

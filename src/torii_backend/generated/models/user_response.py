@@ -40,8 +40,9 @@ class UserResponse(BaseModel):
     created_at: datetime = Field(description="When this user was created (ISO-8601 UTC).", alias="createdAt")
     updated_at: datetime = Field(description="When this user was last modified (ISO-8601 UTC).", alias="updatedAt")
     email: Optional[StrictStr] = Field(default=None, description="Primary email on the profile, if any. Not guaranteed to be verified.")
+    email_verified_at: Optional[datetime] = Field(default=None, description="When this user's primary email was verified, if it has been verified.", alias="emailVerifiedAt")
     deleted_at: Optional[datetime] = Field(default=None, description="When this user was deleted, if soft-deleted. Null for active users.", alias="deletedAt")
-    __properties: ClassVar[List[str]] = ["id", "environmentId", "name", "phone", "locale", "address", "dateOfBirth", "status", "createdAt", "updatedAt", "email", "deletedAt"]
+    __properties: ClassVar[List[str]] = ["id", "environmentId", "name", "phone", "locale", "address", "dateOfBirth", "status", "createdAt", "updatedAt", "email", "emailVerifiedAt", "deletedAt"]
 
     @field_validator('locale')
     def locale_validate_enum(cls, value):
@@ -56,8 +57,8 @@ class UserResponse(BaseModel):
     @field_validator('status')
     def status_validate_enum(cls, value):
         """Validates the enum"""
-        if value not in set(['pending_verification', 'active', 'banned', 'deleted']):
-            raise ValueError("must be one of enum values ('pending_verification', 'active', 'banned', 'deleted')")
+        if value not in set(['active', 'banned', 'deleted']):
+            raise ValueError("must be one of enum values ('active', 'banned', 'deleted')")
         return value
 
     model_config = ConfigDict(
@@ -129,6 +130,11 @@ class UserResponse(BaseModel):
         if self.email is None and "email" in self.model_fields_set:
             _dict['email'] = None
 
+        # set to None if email_verified_at (nullable) is None
+        # and model_fields_set contains the field
+        if self.email_verified_at is None and "email_verified_at" in self.model_fields_set:
+            _dict['emailVerifiedAt'] = None
+
         # set to None if deleted_at (nullable) is None
         # and model_fields_set contains the field
         if self.deleted_at is None and "deleted_at" in self.model_fields_set:
@@ -157,6 +163,7 @@ class UserResponse(BaseModel):
             "createdAt": obj.get("createdAt"),
             "updatedAt": obj.get("updatedAt"),
             "email": obj.get("email"),
+            "emailVerifiedAt": obj.get("emailVerifiedAt"),
             "deletedAt": obj.get("deletedAt")
         })
         return _obj
