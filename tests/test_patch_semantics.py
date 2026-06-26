@@ -109,21 +109,21 @@ def _install_capture(torii) -> dict[str, Any]:
 def test_users_update_wire_body_set() -> None:
     torii = create_torii_client(secret_key="sk_test")
     captured = _install_capture(torii)
-    torii.users.update(uuid4(), first_name="Ada")
+    torii.users.update(uuid4(), UpdateUserRequest(first_name="Ada"))
     assert json.loads(captured["body"]) == {"firstName": "Ada"}
 
 
 def test_users_update_wire_body_clear() -> None:
     torii = create_torii_client(secret_key="sk_test")
     captured = _install_capture(torii)
-    torii.users.update(uuid4(), last_name=None)
+    torii.users.update(uuid4(), UpdateUserRequest(last_name=None))
     assert json.loads(captured["body"]) == {"lastName": None}
 
 
 def test_users_update_wire_body_omit() -> None:
     torii = create_torii_client(secret_key="sk_test")
     captured = _install_capture(torii)
-    torii.users.update(uuid4())
+    torii.users.update(uuid4(), UpdateUserRequest())
     # No fields touched → empty JSON object on the wire.
     assert json.loads(captured["body"]) == {}
 
@@ -131,7 +131,9 @@ def test_users_update_wire_body_omit() -> None:
 def test_users_update_wire_body_mixed_with_metadata() -> None:
     torii = create_torii_client(secret_key="sk_test")
     captured = _install_capture(torii)
-    torii.users.update(uuid4(), first_name="Ada", last_name=None, unsafe_metadata={"tier": "pro"})
+    torii.users.update(
+        uuid4(), UpdateUserRequest(first_name="Ada", last_name=None, unsafe_metadata={"tier": "pro"})
+    )
     assert json.loads(captured["body"]) == {
         "firstName": "Ada",
         "lastName": None,
@@ -159,5 +161,5 @@ def test_users_update_sends_bearer_auth_header() -> None:
     # bypasses the generated update_user wrapper.
     torii = create_torii_client(secret_key="sk_test_abc")
     captured = _install_capture(torii)
-    torii.users.update(uuid4(), first_name="Ada")
+    torii.users.update(uuid4(), UpdateUserRequest(first_name="Ada"))
     assert captured["headers"].get("Authorization") == "Bearer sk_test_abc"

@@ -33,12 +33,6 @@ from torii_backend.generated.models import (
     UserSessionResponse,
 )
 
-# Sentinel to distinguish "argument not passed" from "explicit None" in the
-# keyword-arg flavour of ``users.update`` / ``users.create``. We must NOT use
-# ``None`` for this purpose because PATCH semantics require ``None`` to mean
-# "clear this field on the server". See README "PATCH semantics".
-_UNSET: Any = object()
-
 DEFAULT_API_URL = "https://api.torii.so"
 
 
@@ -79,98 +73,44 @@ class UsersClient:
         with _translate_api_error():
             return self._api.get_user(_coerce_uuid(user_id))
 
-    def create(
-        self,
-        input: CreateUserRequest | dict[str, Any] | None = None,
-        *,
-        email: str | None = _UNSET,
-        password: str | None = _UNSET,
-        first_name: str | None = _UNSET,
-        last_name: str | None = _UNSET,
-        public_metadata: dict[str, Any] | None = _UNSET,
-        private_metadata: dict[str, Any] | None = _UNSET,
-        unsafe_metadata: dict[str, Any] | None = _UNSET,
-    ) -> ServerUserResponse:
+    def create(self, body: CreateUserRequest | dict[str, Any]) -> ServerUserResponse:
         """Create a user.
 
-        Two call shapes:
-          * Pass a ``CreateUserRequest`` / dict positionally; OR
-          * Pass keyword args directly (``email=...``, ``first_name=...``, etc.).
+        Pass a ``CreateUserRequest`` or an equivalent ``dict`` (camelCase keys).
+        Accepting the generated request type directly means a new spec field
+        flows through with zero hand edits. Metadata bags are optional; omit
+        them and the server defaults each to ``{}`` (never clobbered).
         """
-        if input is not None:
-            body = (
-                input
-                if isinstance(input, CreateUserRequest)
-                else CreateUserRequest.from_dict(input)
-            )
-        else:
-            kwargs = {
-                "email": email,
-                "password": password,
-                "firstName": first_name,
-                "lastName": last_name,
-                # Metadata bags are optional in the spec; omit when not passed
-                # so the server applies its own default ({}). Never clobber.
-                "publicMetadata": public_metadata,
-                "privateMetadata": private_metadata,
-                "unsafeMetadata": unsafe_metadata,
-            }
-            payload = {k: v for k, v in kwargs.items() if v is not _UNSET}
-            body = CreateUserRequest.model_validate(payload)
+        model = body if isinstance(body, CreateUserRequest) else CreateUserRequest.from_dict(body)
         with _translate_api_error():
-            return self._api.create_user(body)
+            return self._api.create_user(model)
 
     def update(
         self,
         user_id: str | UUID,
-        input: UpdateUserRequest | dict[str, Any] | None = None,
-        *,
-        first_name: str | None = _UNSET,
-        last_name: str | None = _UNSET,
-        locale: str | None = _UNSET,
-        unsafe_metadata: dict[str, Any] | None = _UNSET,
+        body: UpdateUserRequest | dict[str, Any],
     ) -> ServerUserResponse:
         """Patch a user.
 
-        Tri-state PATCH semantics — only fields the caller explicitly set
-        are sent to the server:
-          * not passed → omitted from the JSON body → server leaves alone
-          * ``None``   → emitted as ``null``        → server clears
-          * value      → emitted with value         → server updates
+        Tri-state PATCH semantics, driven entirely by the request model's
+        ``model_fields_set`` — there are no per-field kwargs to maintain, so a
+        new spec field flows through with zero hand edits:
+          * a field not set on the model → omitted from the body → server leaves it alone
+          * a field set to ``None``       → emitted as ``null``    → server clears it
+          * a field set to a value        → emitted with the value → server updates it
 
-        Two call shapes:
-          * Pass an ``UpdateUserRequest`` / dict positionally; the request
-            model's ``model_fields_set`` drives which keys are sent; OR
-          * Pass keyword args directly (``first_name="Ada"``, ``last_name=None``, ...).
-            Only the kwargs you pass appear on the wire.
+        Pass an ``UpdateUserRequest`` (built with only the fields you want to
+        touch) or an equivalent ``dict`` (camelCase keys). Metadata bags are
+        2-state (omit vs object); a null-valued key inside a bag deletes it.
         """
-        if input is not None:
-            model = (
-                input
-                if isinstance(input, UpdateUserRequest)
-                else UpdateUserRequest.model_validate(input)
-            )
-        else:
-            kwargs = {
-                "firstName": first_name,
-                "lastName": last_name,
-                "locale": locale,
-                "unsafeMetadata": unsafe_metadata,
-            }
-            model = UpdateUserRequest.model_validate(
-                {k: v for k, v in kwargs.items() if v is not _UNSET}
-            )
-        # Build the wire body from the model's *explicitly set* fields only.
-        # We must NOT pass the model through the generated ``update_user`` —
-        # it's wrapped in pydantic's ``@validate_call`` which would re-coerce
-        # the dict back into an ``UpdateUserRequest`` and then serialize via
-        # ``to_dict()`` (which uses ``exclude_none=True``). That collapses
-        # ``phone=None`` ("clear this field") into "omit", breaking tri-state.
-        # Drop down to the serializer + ``call_api`` directly so the dict we
-        # built survives untouched.
-        body = model.model_dump(exclude_unset=True, by_alias=True)
+        model = body if isinstance(body, UpdateUserRequest) else UpdateUserRequest.model_validate(body)
+        # Serialize only the model's explicitly-set fields. We bypass the generated
+        # ``update_user`` because its ``@validate_call`` re-coerces via ``to_dict()``
+        # (``exclude_none=True``), which would collapse an explicit ``None`` ("clear")
+        # into "omit" and break tri-state. ``_patch_user`` sends our dict untouched.
+        wire = model.model_dump(exclude_unset=True, by_alias=True)
         with _translate_api_error():
-            return self._patch_user(_coerce_uuid(user_id), body)
+            return self._patch_user(_coerce_uuid(user_id), wire)
 
     def _patch_user(self, user_id: Any, body: dict[str, Any]) -> ServerUserResponse:
         params = self._api._update_user_serialize(

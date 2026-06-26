@@ -1,0 +1,143 @@
+{
+  "_comment": "Canonical tri-state PATCH wire contract, shared by the server round-trip test (server/.../PatchWireContractTest.kt) and every backend SDK's parity test. expectedBody is the EXACT JSON an SDK must emit for the described caller intent: a key absent => leave unchanged, key:null => clear, key:value => set. Metadata bags are 2-state at the field level (omit vs object); a null-valued key INSIDE a bag deletes that key. statuses (non-nullable optional) must be omitted when unset, never sent as null. Do not weaken without versioning to server-v2. See docs/sdk-tristate-parity.md.",
+  "fixtures": [
+    {
+      "name": "update_leave_all",
+      "schema": "UpdateUserRequest",
+      "endpoint": "update",
+      "description": "All fields omitted -> empty body -> user unchanged.",
+      "expectedBody": {},
+      "roundTrip": {
+        "seed": { "firstName": "Alice", "lastName": "Smith", "locale": "en" },
+        "after": { "firstName": "Alice", "lastName": "Smith", "locale": "en" }
+      }
+    },
+    {
+      "name": "update_set_first_name",
+      "schema": "UpdateUserRequest",
+      "endpoint": "update",
+      "description": "firstName set to a value; lastName left untouched.",
+      "expectedBody": { "firstName": "Ada" },
+      "roundTrip": {
+        "seed": { "firstName": "Alice", "lastName": "Smith" },
+        "after": { "firstName": "Ada", "lastName": "Smith" }
+      }
+    },
+    {
+      "name": "update_clear_last_name",
+      "schema": "UpdateUserRequest",
+      "endpoint": "update",
+      "description": "lastName cleared via explicit null; firstName left untouched.",
+      "expectedBody": { "lastName": null },
+      "roundTrip": {
+        "seed": { "firstName": "Alice", "lastName": "Smith" },
+        "after": { "firstName": "Alice", "lastName": null }
+      }
+    },
+    {
+      "name": "update_set_and_clear",
+      "schema": "UpdateUserRequest",
+      "endpoint": "update",
+      "description": "firstName set, lastName cleared, locale left untouched in one PATCH.",
+      "expectedBody": { "firstName": "Alicia", "lastName": null },
+      "roundTrip": {
+        "seed": { "firstName": "Alice", "lastName": "Smith", "locale": "en" },
+        "after": { "firstName": "Alicia", "lastName": null, "locale": "en" }
+      }
+    },
+    {
+      "name": "update_metadata_merge",
+      "schema": "UpdateUserRequest",
+      "endpoint": "update",
+      "description": "unsafeMetadata bag present -> deep-merges; existing keys preserved.",
+      "expectedBody": { "unsafeMetadata": { "plan": "pro" } },
+      "roundTrip": {
+        "seed": { "unsafeMetadata": { "step": 1 } },
+        "after": { "unsafeMetadata.step": 1, "unsafeMetadata.plan": "pro" }
+      }
+    },
+    {
+      "name": "update_metadata_delete_key",
+      "schema": "UpdateUserRequest",
+      "endpoint": "update",
+      "description": "A null-valued key inside the bag deletes that key (tri-state lives INSIDE the bag, the bag itself is 2-state).",
+      "expectedBody": { "unsafeMetadata": { "foo": null } },
+      "roundTrip": {
+        "seed": { "unsafeMetadata": { "foo": "x", "bar": "y" } },
+        "after": { "unsafeMetadata.bar": "y" },
+        "absent": [ "unsafeMetadata.foo" ]
+      }
+    },
+    {
+      "name": "metadata_public_only",
+      "schema": "UpdateUserMetadataRequest",
+      "endpoint": "metadata",
+      "description": "Only publicMetadata supplied; other bags left untouched.",
+      "expectedBody": { "publicMetadata": { "role": "admin" } },
+      "roundTrip": {
+        "seed": { "unsafeMetadata": { "step": 3 } },
+        "after": { "publicMetadata.role": "admin", "unsafeMetadata.step": 3 }
+      }
+    },
+    {
+      "name": "metadata_delete_key",
+      "schema": "UpdateUserMetadataRequest",
+      "endpoint": "metadata",
+      "description": "Null-valued key deletes within the public bag; sibling key survives.",
+      "expectedBody": { "publicMetadata": { "a": null } },
+      "roundTrip": {
+        "seed": { "publicMetadata": { "a": "1", "b": "2" } },
+        "after": { "publicMetadata.b": "2" },
+        "absent": [ "publicMetadata.a" ]
+      }
+    },
+    {
+      "name": "search_empty_omits_statuses",
+      "schema": "ServerUserSearchRequest",
+      "endpoint": "search",
+      "description": "No filters -> empty body. CRITICAL: statuses (non-nullable optional) MUST be omitted, never sent as null (the server rejects null statuses).",
+      "expectedBody": {},
+      "sdkOnly": true
+    },
+    {
+      "name": "search_by_name",
+      "schema": "ServerUserSearchRequest",
+      "endpoint": "search",
+      "description": "name filter set; statuses/dates omitted.",
+      "expectedBody": { "name": "alice" },
+      "sdkOnly": true
+    },
+    {
+      "name": "search_clear_name_filter",
+      "schema": "ServerUserSearchRequest",
+      "endpoint": "search",
+      "description": "name explicitly null -> filter for users with no name (search name is tri-state on the server).",
+      "expectedBody": { "name": null },
+      "sdkOnly": true
+    },
+    {
+      "name": "search_statuses",
+      "schema": "ServerUserSearchRequest",
+      "endpoint": "search",
+      "description": "statuses filter present with one value.",
+      "expectedBody": { "statuses": ["active"] },
+      "sdkOnly": true
+    },
+    {
+      "name": "create_minimal",
+      "schema": "CreateUserRequest",
+      "endpoint": "create",
+      "description": "Only email supplied; metadata bags omitted (non-nullable optional, default empty server-side).",
+      "expectedBody": { "email": "ada@example.com" },
+      "sdkOnly": true
+    },
+    {
+      "name": "create_with_metadata",
+      "schema": "CreateUserRequest",
+      "endpoint": "create",
+      "description": "email + a public metadata bag.",
+      "expectedBody": { "email": "grace@example.com", "publicMetadata": { "plan": "free" } },
+      "sdkOnly": true
+    }
+  ]
+}
