@@ -17,23 +17,20 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict, Field
 from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 from pydantic_core import to_jsonable_python
 
-class ProblemDetail(BaseModel):
+class UpdateUserMetadataRequest(BaseModel):
     """
-    ProblemDetail
+    PATCH body for a user's metadata bags. Each bag is tri-state: omit to leave it unchanged, or send an object value. Whether the object merges into or replaces the bag depends on the endpoint (see its operation description).
     """ # noqa: E501
-    type: Optional[StrictStr] = None
-    title: Optional[StrictStr] = None
-    status: Optional[StrictInt] = None
-    detail: Optional[StrictStr] = None
-    instance: Optional[StrictStr] = None
-    properties: Optional[Dict[str, Any]] = None
-    __properties: ClassVar[List[str]] = ["type", "title", "status", "detail", "instance", "properties"]
+    public_metadata: Optional[Dict[str, Any]] = Field(default=None, description="Public metadata bag: SDK-readable, server-written. Max 512 bytes.", alias="publicMetadata")
+    private_metadata: Optional[Dict[str, Any]] = Field(default=None, description="Private metadata bag: server-only, never exposed to the SDK or in a JWT. Max 4096 bytes.", alias="privateMetadata")
+    unsafe_metadata: Optional[Dict[str, Any]] = Field(default=None, description="Unsafe metadata bag: readable and writable by the end-user via the SDK. Max 512 bytes.", alias="unsafeMetadata")
+    __properties: ClassVar[List[str]] = ["publicMetadata", "privateMetadata", "unsafeMetadata"]
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -53,7 +50,7 @@ class ProblemDetail(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of ProblemDetail from a JSON string"""
+        """Create an instance of UpdateUserMetadataRequest from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -78,7 +75,7 @@ class ProblemDetail(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of ProblemDetail from a dict"""
+        """Create an instance of UpdateUserMetadataRequest from a dict"""
         if obj is None:
             return None
 
@@ -86,12 +83,9 @@ class ProblemDetail(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "type": obj.get("type"),
-            "title": obj.get("title"),
-            "status": obj.get("status"),
-            "detail": obj.get("detail"),
-            "instance": obj.get("instance"),
-            "properties": obj.get("properties")
+            "publicMetadata": obj.get("publicMetadata"),
+            "privateMetadata": obj.get("privateMetadata"),
+            "unsafeMetadata": obj.get("unsafeMetadata")
         })
         return _obj
 

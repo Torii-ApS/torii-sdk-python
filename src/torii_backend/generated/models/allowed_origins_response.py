@@ -17,23 +17,18 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
+from pydantic import BaseModel, ConfigDict, StrictStr
+from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 from pydantic_core import to_jsonable_python
 
-class ProblemDetail(BaseModel):
+class AllowedOriginsResponse(BaseModel):
     """
-    ProblemDetail
+    AllowedOriginsResponse
     """ # noqa: E501
-    type: Optional[StrictStr] = None
-    title: Optional[StrictStr] = None
-    status: Optional[StrictInt] = None
-    detail: Optional[StrictStr] = None
-    instance: Optional[StrictStr] = None
-    properties: Optional[Dict[str, Any]] = None
-    __properties: ClassVar[List[str]] = ["type", "title", "status", "detail", "instance", "properties"]
+    origins: List[StrictStr]
+    __properties: ClassVar[List[str]] = ["origins"]
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -53,7 +48,7 @@ class ProblemDetail(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of ProblemDetail from a JSON string"""
+        """Create an instance of AllowedOriginsResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -78,7 +73,7 @@ class ProblemDetail(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of ProblemDetail from a dict"""
+        """Create an instance of AllowedOriginsResponse from a dict"""
         if obj is None:
             return None
 
@@ -86,12 +81,7 @@ class ProblemDetail(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "type": obj.get("type"),
-            "title": obj.get("title"),
-            "status": obj.get("status"),
-            "detail": obj.get("detail"),
-            "instance": obj.get("instance"),
-            "properties": obj.get("properties")
+            "origins": obj.get("origins")
         })
         return _obj
 
