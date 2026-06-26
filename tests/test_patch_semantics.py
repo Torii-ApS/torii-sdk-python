@@ -12,7 +12,6 @@ as the source of truth — no wrapper class needed.
 from __future__ import annotations
 
 import json
-from datetime import date
 from typing import Any
 from unittest.mock import MagicMock
 from uuid import uuid4
@@ -28,13 +27,13 @@ def _dump(model: UpdateUserRequest) -> dict[str, Any]:
 
 
 def test_set() -> None:
-    body = _dump(UpdateUserRequest(name="Ada"))
-    assert body == {"name": "Ada"}
+    body = _dump(UpdateUserRequest(first_name="Ada"))
+    assert body == {"firstName": "Ada"}
 
 
 def test_clear() -> None:
-    body = _dump(UpdateUserRequest(phone=None))
-    assert body == {"phone": None}
+    body = _dump(UpdateUserRequest(last_name=None))
+    assert body == {"lastName": None}
 
 
 def test_omit() -> None:
@@ -43,23 +42,23 @@ def test_omit() -> None:
 
 
 def test_mixed() -> None:
-    body = _dump(UpdateUserRequest(name="Ada", phone=None))
-    assert body == {"name": "Ada", "phone": None}
+    body = _dump(UpdateUserRequest(first_name="Ada", last_name=None))
+    assert body == {"firstName": "Ada", "lastName": None}
 
 
-def test_alias_emitted_for_date_of_birth() -> None:
-    body = _dump(UpdateUserRequest(date_of_birth="1990-01-01"))
-    assert body == {"dateOfBirth": date(1990, 1, 1)}
+def test_unsafe_metadata_set() -> None:
+    body = _dump(UpdateUserRequest(unsafe_metadata={"tier": "pro"}))
+    assert body == {"unsafeMetadata": {"tier": "pro"}}
 
 
-def test_alias_clear_for_date_of_birth() -> None:
-    body = _dump(UpdateUserRequest(date_of_birth=None))
-    assert body == {"dateOfBirth": None}
+def test_unsafe_metadata_clear() -> None:
+    body = _dump(UpdateUserRequest(unsafe_metadata=None))
+    assert body == {"unsafeMetadata": None}
 
 
 def test_model_fields_set_tracks_explicit_only() -> None:
-    assert UpdateUserRequest(name="Ada").model_fields_set == {"name"}
-    assert UpdateUserRequest(name=None).model_fields_set == {"name"}
+    assert UpdateUserRequest(first_name="Ada").model_fields_set == {"first_name"}
+    assert UpdateUserRequest(first_name=None).model_fields_set == {"first_name"}
     assert UpdateUserRequest().model_fields_set == set()
 
 
@@ -73,6 +72,9 @@ def _fake_user_response(user_id: str) -> dict[str, Any]:
         "status": "active",
         "createdAt": "2025-01-01T00:00:00Z",
         "updatedAt": "2025-01-01T00:00:00Z",
+        "publicMetadata": {},
+        "privateMetadata": {},
+        "unsafeMetadata": {},
     }
 
 
@@ -107,15 +109,15 @@ def _install_capture(torii) -> dict[str, Any]:
 def test_users_update_wire_body_set() -> None:
     torii = create_torii_client(secret_key="sk_test")
     captured = _install_capture(torii)
-    torii.users.update(uuid4(), name="Ada")
-    assert json.loads(captured["body"]) == {"name": "Ada"}
+    torii.users.update(uuid4(), first_name="Ada")
+    assert json.loads(captured["body"]) == {"firstName": "Ada"}
 
 
 def test_users_update_wire_body_clear() -> None:
     torii = create_torii_client(secret_key="sk_test")
     captured = _install_capture(torii)
-    torii.users.update(uuid4(), phone=None)
-    assert json.loads(captured["body"]) == {"phone": None}
+    torii.users.update(uuid4(), last_name=None)
+    assert json.loads(captured["body"]) == {"lastName": None}
 
 
 def test_users_update_wire_body_omit() -> None:
@@ -126,28 +128,26 @@ def test_users_update_wire_body_omit() -> None:
     assert json.loads(captured["body"]) == {}
 
 
-def test_users_update_wire_body_mixed_with_alias() -> None:
+def test_users_update_wire_body_mixed_with_metadata() -> None:
     torii = create_torii_client(secret_key="sk_test")
     captured = _install_capture(torii)
-    torii.users.update(uuid4(), name="Ada", phone=None, date_of_birth=date(1990, 1, 1))
+    torii.users.update(uuid4(), first_name="Ada", last_name=None, unsafe_metadata={"tier": "pro"})
     assert json.loads(captured["body"]) == {
-        "name": "Ada",
-        "phone": None,
-        "dateOfBirth": "1990-01-01",
+        "firstName": "Ada",
+        "lastName": None,
+        "unsafeMetadata": {"tier": "pro"},
     }
 
 
 def test_users_update_accepts_model_positional() -> None:
     torii = create_torii_client(secret_key="sk_test")
     captured = _install_capture(torii)
-    torii.users.update(uuid4(), UpdateUserRequest(name="Ada", phone=None))
-    assert json.loads(captured["body"]) == {"name": "Ada", "phone": None}
+    torii.users.update(uuid4(), UpdateUserRequest(first_name="Ada", last_name=None))
+    assert json.loads(captured["body"]) == {"firstName": "Ada", "lastName": None}
 
 
 def test_users_update_accepts_dict_positional() -> None:
     torii = create_torii_client(secret_key="sk_test")
     captured = _install_capture(torii)
-    torii.users.update(uuid4(), {"name": "Ada"})
-    assert json.loads(captured["body"]) == {"name": "Ada"}
-
-
+    torii.users.update(uuid4(), {"firstName": "Ada"})
+    assert json.loads(captured["body"]) == {"firstName": "Ada"}

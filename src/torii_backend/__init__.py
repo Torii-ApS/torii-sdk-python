@@ -14,7 +14,7 @@ from torii_backend.generated.models import (
     CreateUserRequest as ToriiCreateUserInput,
 )
 from torii_backend.generated.models import (
-    CursorPageResponseUserResponse as ToriiCursorPageUser,
+    CursorPageResponseServerUserResponse as ToriiCursorPageUser,
 )
 from torii_backend.generated.models import (
     ProblemDetail as ToriiProblemDetail,
@@ -23,7 +23,7 @@ from torii_backend.generated.models import (
     UpdateUserRequest as ToriiUpdateUserInput,
 )
 from torii_backend.generated.models import (
-    UserResponse as ToriiUser,
+    ServerUserResponse as ToriiUser,
 )
 from torii_backend.generated.models import (
     UserSessionResponse as ToriiSession,

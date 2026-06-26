@@ -26,10 +26,10 @@ from torii_backend.generated import (
 )
 from torii_backend.generated.models import (
     CreateUserRequest,
-    CursorPageResponseUserResponse,
+    CursorPageResponseServerUserResponse,
+    ServerUserResponse,
     ServerUserSearchRequest,
     UpdateUserRequest,
-    UserResponse,
     UserSessionResponse,
 )
 
@@ -56,7 +56,7 @@ class UsersClient:
         statuses: list[str] | None = None,
         created_after: str | datetime | None = None,
         created_before: str | datetime | None = None,
-    ) -> CursorPageResponseUserResponse:
+    ) -> CursorPageResponseServerUserResponse:
         """Search users. Server-side cursor-paginated; loop with the
         returned ``next_cursor`` until ``has_more`` is False."""
         search = ServerUserSearchRequest.from_dict(
@@ -75,7 +75,7 @@ class UsersClient:
                 server_user_search_request=search,
             )
 
-    def get(self, user_id: str | UUID) -> UserResponse:
+    def get(self, user_id: str | UUID) -> ServerUserResponse:
         with _translate_api_error():
             return self._api.get_user(_coerce_uuid(user_id))
 
@@ -85,16 +85,17 @@ class UsersClient:
         *,
         email: str | None = _UNSET,
         password: str | None = _UNSET,
-        name: str | None = _UNSET,
-        phone: str | None = _UNSET,
-        address: str | None = _UNSET,
-        date_of_birth: str | date | None = _UNSET,
-    ) -> UserResponse:
+        first_name: str | None = _UNSET,
+        last_name: str | None = _UNSET,
+        public_metadata: dict[str, Any] | None = _UNSET,
+        private_metadata: dict[str, Any] | None = _UNSET,
+        unsafe_metadata: dict[str, Any] | None = _UNSET,
+    ) -> ServerUserResponse:
         """Create a user.
 
         Two call shapes:
           * Pass a ``CreateUserRequest`` / dict positionally; OR
-          * Pass keyword args directly (``email=...``, ``name=...``, etc.).
+          * Pass keyword args directly (``email=...``, ``first_name=...``, etc.).
         """
         if input is not None:
             body = (
@@ -106,14 +107,16 @@ class UsersClient:
             kwargs = {
                 "email": email,
                 "password": password,
-                "name": name,
-                "phone": phone,
-                "address": address,
-                "dateOfBirth": date_of_birth,
+                "firstName": first_name,
+                "lastName": last_name,
             }
-            body = CreateUserRequest.model_validate(
-                {k: v for k, v in kwargs.items() if v is not _UNSET}
-            )
+            payload = {k: v for k, v in kwargs.items() if v is not _UNSET}
+            # The three metadata bags are required; default to {} when omitted
+            # (a brand-new user has no metadata to clobber).
+            payload["publicMetadata"] = {} if public_metadata is _UNSET else public_metadata
+            payload["privateMetadata"] = {} if private_metadata is _UNSET else private_metadata
+            payload["unsafeMetadata"] = {} if unsafe_metadata is _UNSET else unsafe_metadata
+            body = CreateUserRequest.model_validate(payload)
         with _translate_api_error():
             return self._api.create_user(body)
 
@@ -122,12 +125,11 @@ class UsersClient:
         user_id: str | UUID,
         input: UpdateUserRequest | dict[str, Any] | None = None,
         *,
-        name: str | None = _UNSET,
-        phone: str | None = _UNSET,
+        first_name: str | None = _UNSET,
+        last_name: str | None = _UNSET,
         locale: str | None = _UNSET,
-        address: str | None = _UNSET,
-        date_of_birth: str | date | None = _UNSET,
-    ) -> UserResponse:
+        unsafe_metadata: dict[str, Any] | None = _UNSET,
+    ) -> ServerUserResponse:
         """Patch a user.
 
         Tri-state PATCH semantics — only fields the caller explicitly set
@@ -139,7 +141,7 @@ class UsersClient:
         Two call shapes:
           * Pass an ``UpdateUserRequest`` / dict positionally; the request
             model's ``model_fields_set`` drives which keys are sent; OR
-          * Pass keyword args directly (``name="Ada"``, ``phone=None``, ...).
+          * Pass keyword args directly (``first_name="Ada"``, ``last_name=None``, ...).
             Only the kwargs you pass appear on the wire.
         """
         if input is not None:
@@ -150,11 +152,10 @@ class UsersClient:
             )
         else:
             kwargs = {
-                "name": name,
-                "phone": phone,
+                "firstName": first_name,
+                "lastName": last_name,
                 "locale": locale,
-                "address": address,
-                "dateOfBirth": date_of_birth,
+                "unsafeMetadata": unsafe_metadata,
             }
             model = UpdateUserRequest.model_validate(
                 {k: v for k, v in kwargs.items() if v is not _UNSET}
@@ -171,7 +172,7 @@ class UsersClient:
         with _translate_api_error():
             return self._patch_user(_coerce_uuid(user_id), body)
 
-    def _patch_user(self, user_id: Any, body: dict[str, Any]) -> UserResponse:
+    def _patch_user(self, user_id: Any, body: dict[str, Any]) -> ServerUserResponse:
         params = self._api._update_user_serialize(
             user_id=user_id,
             update_user_request=body,
@@ -184,18 +185,18 @@ class UsersClient:
         response.read()
         return self._api.api_client.response_deserialize(
             response_data=response,
-            response_types_map={"200": "UserResponse"},
+            response_types_map={"200": "ServerUserResponse"},
         ).data
 
     def delete(self, user_id: str | UUID) -> None:
         with _translate_api_error():
             self._api.delete_user(_coerce_uuid(user_id))
 
-    def ban(self, user_id: str | UUID) -> UserResponse:
+    def ban(self, user_id: str | UUID) -> ServerUserResponse:
         with _translate_api_error():
             return self._api.ban_user(_coerce_uuid(user_id))
 
-    def unban(self, user_id: str | UUID) -> UserResponse:
+    def unban(self, user_id: str | UUID) -> ServerUserResponse:
         with _translate_api_error():
             return self._api.unban_user(_coerce_uuid(user_id))
 
