@@ -20,10 +20,10 @@ from torii_backend.generated.models import (
     ProblemDetail as ToriiProblemDetail,
 )
 from torii_backend.generated.models import (
-    UpdateUserRequest as ToriiUpdateUserInput,
+    ServerUserResponse as ToriiUser,
 )
 from torii_backend.generated.models import (
-    ServerUserResponse as ToriiUser,
+    UpdateUserRequest as ToriiUpdateUserInput,
 )
 from torii_backend.generated.models import (
     UserSessionResponse as ToriiSession,

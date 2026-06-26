@@ -12,7 +12,7 @@ regenerate and add a one-line wrapper method per new endpoint.
 
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import datetime
 from typing import Any
 from uuid import UUID
 
