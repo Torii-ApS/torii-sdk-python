@@ -1,6 +1,6 @@
 [project]
 name = "torii-backend"
-version = "0.0.6"
+version = "0.0.7"
 description = "Backend SDK for torii — verify JWTs, manage users, react to events from your Python server."
 readme = "README.md"
 requires-python = ">=3.9"
