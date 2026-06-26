@@ -151,3 +151,13 @@ def test_users_update_accepts_dict_positional() -> None:
     captured = _install_capture(torii)
     torii.users.update(uuid4(), {"firstName": "Ada"})
     assert json.loads(captured["body"]) == {"firstName": "Ada"}
+
+
+def test_users_update_sends_bearer_auth_header() -> None:
+    # The secret key must reach the wire as `Authorization: Bearer ...` via the
+    # generated bearerAuth scheme — even on the hand-rolled PATCH path, which
+    # bypasses the generated update_user wrapper.
+    torii = create_torii_client(secret_key="sk_test_abc")
+    captured = _install_capture(torii)
+    torii.users.update(uuid4(), first_name="Ada")
+    assert captured["headers"].get("Authorization") == "Bearer sk_test_abc"

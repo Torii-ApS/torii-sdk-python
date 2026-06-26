@@ -31,9 +31,9 @@ class CreateUserRequest(BaseModel):
     password: Optional[StrictStr] = Field(default=None, description="Initial password. Subject to the environment's password policy. Omit to create a passwordless user (e.g. social-only).")
     first_name: Optional[StrictStr] = Field(default=None, description="First (given) name to seed on the profile.", alias="firstName")
     last_name: Optional[StrictStr] = Field(default=None, description="Last (family) name to seed on the profile.", alias="lastName")
-    public_metadata: Dict[str, Any] = Field(description="Initial public metadata (SDK-readable, server-written). Max 512 bytes.", alias="publicMetadata")
-    private_metadata: Dict[str, Any] = Field(description="Initial private metadata (server-only). Max 4096 bytes.", alias="privateMetadata")
-    unsafe_metadata: Dict[str, Any] = Field(description="Initial unsafe metadata (end-user writable). Max 512 bytes.", alias="unsafeMetadata")
+    public_metadata: Optional[Dict[str, Any]] = Field(default=None, description="Initial public metadata (SDK-readable, server-written). Max 512 bytes.", alias="publicMetadata")
+    private_metadata: Optional[Dict[str, Any]] = Field(default=None, description="Initial private metadata (server-only). Max 4096 bytes.", alias="privateMetadata")
+    unsafe_metadata: Optional[Dict[str, Any]] = Field(default=None, description="Initial unsafe metadata (end-user writable). Max 512 bytes.", alias="unsafeMetadata")
     __properties: ClassVar[List[str]] = ["email", "password", "firstName", "lastName", "publicMetadata", "privateMetadata", "unsafeMetadata"]
 
     model_config = ConfigDict(

@@ -109,13 +109,13 @@ class UsersClient:
                 "password": password,
                 "firstName": first_name,
                 "lastName": last_name,
+                # Metadata bags are optional in the spec; omit when not passed
+                # so the server applies its own default ({}). Never clobber.
+                "publicMetadata": public_metadata,
+                "privateMetadata": private_metadata,
+                "unsafeMetadata": unsafe_metadata,
             }
             payload = {k: v for k, v in kwargs.items() if v is not _UNSET}
-            # The three metadata bags are required; default to {} when omitted
-            # (a brand-new user has no metadata to clobber).
-            payload["publicMetadata"] = {} if public_metadata is _UNSET else public_metadata
-            payload["privateMetadata"] = {} if private_metadata is _UNSET else private_metadata
-            payload["unsafeMetadata"] = {} if unsafe_metadata is _UNSET else unsafe_metadata
             body = CreateUserRequest.model_validate(payload)
         with _translate_api_error():
             return self._api.create_user(body)
@@ -254,10 +254,10 @@ def create_torii_client(
     if not secret_key:
         raise ValueError("create_torii_client: secret_key is required")
     config = Configuration(host=(api_url or DEFAULT_API_URL).rstrip("/"))
+    # The spec declares a `bearerAuth` HTTP-bearer scheme, so the generated
+    # operations apply `Authorization: Bearer <access_token>` automatically.
+    config.access_token = secret_key
     api_client = ApiClient(configuration=config)
-    # Spec doesn't declare a securityScheme, so authorise via a default
-    # header on every request rather than the ``access_token`` config slot.
-    api_client.set_default_header("Authorization", f"Bearer {secret_key}")
     return ToriiClient(api_client)
 
 
