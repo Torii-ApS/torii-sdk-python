@@ -19,6 +19,8 @@ __version__ = "1.0.0"
 # Define package exports
 __all__ = [
     "AllowedOriginsApi",
+    "InvitationsApi",
+    "ServerImpersonationApi",
     "ServerSessionsApi",
     "ServerUsersApi",
     "ApiResponse",
@@ -31,9 +33,14 @@ __all__ = [
     "ApiAttributeError",
     "ApiException",
     "AllowedOriginsResponse",
+    "CreateEnvironmentInvitationServerRequest",
     "CreateUserRequest",
+    "CursorPageResponseEnvironmentInvitationResponse",
     "CursorPageResponseServerUserResponse",
+    "EnvironmentInvitationResponse",
     "ProblemDetail",
+    "ServerImpersonationTokenRequest",
+    "ServerImpersonationTokenResponse",
     "ServerUserResponse",
     "ServerUserSearchRequest",
     "SetAllowedOriginsRequest",
@@ -44,6 +51,8 @@ __all__ = [
 
 # import apis into sdk package
 from torii_backend.generated.api.allowed_origins_api import AllowedOriginsApi as AllowedOriginsApi
+from torii_backend.generated.api.invitations_api import InvitationsApi as InvitationsApi
+from torii_backend.generated.api.server_impersonation_api import ServerImpersonationApi as ServerImpersonationApi
 from torii_backend.generated.api.server_sessions_api import ServerSessionsApi as ServerSessionsApi
 from torii_backend.generated.api.server_users_api import ServerUsersApi as ServerUsersApi
 
@@ -60,9 +69,14 @@ from torii_backend.generated.exceptions import ApiException as ApiException
 
 # import models into sdk package
 from torii_backend.generated.models.allowed_origins_response import AllowedOriginsResponse as AllowedOriginsResponse
+from torii_backend.generated.models.create_environment_invitation_server_request import CreateEnvironmentInvitationServerRequest as CreateEnvironmentInvitationServerRequest
 from torii_backend.generated.models.create_user_request import CreateUserRequest as CreateUserRequest
+from torii_backend.generated.models.cursor_page_response_environment_invitation_response import CursorPageResponseEnvironmentInvitationResponse as CursorPageResponseEnvironmentInvitationResponse
 from torii_backend.generated.models.cursor_page_response_server_user_response import CursorPageResponseServerUserResponse as CursorPageResponseServerUserResponse
+from torii_backend.generated.models.environment_invitation_response import EnvironmentInvitationResponse as EnvironmentInvitationResponse
 from torii_backend.generated.models.problem_detail import ProblemDetail as ProblemDetail
+from torii_backend.generated.models.server_impersonation_token_request import ServerImpersonationTokenRequest as ServerImpersonationTokenRequest
+from torii_backend.generated.models.server_impersonation_token_response import ServerImpersonationTokenResponse as ServerImpersonationTokenResponse
 from torii_backend.generated.models.server_user_response import ServerUserResponse as ServerUserResponse
 from torii_backend.generated.models.server_user_search_request import ServerUserSearchRequest as ServerUserSearchRequest
 from torii_backend.generated.models.set_allowed_origins_request import SetAllowedOriginsRequest as SetAllowedOriginsRequest

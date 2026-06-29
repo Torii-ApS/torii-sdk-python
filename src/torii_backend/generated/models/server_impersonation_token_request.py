@@ -19,18 +19,20 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field
 from typing import Any, ClassVar, Dict, List, Optional
+from typing_extensions import Annotated
+from uuid import UUID
 from typing import Optional, Set
 from typing_extensions import Self
 from pydantic_core import to_jsonable_python
 
-class UpdateUserMetadataRequest(BaseModel):
+class ServerImpersonationTokenRequest(BaseModel):
     """
-    PATCH body for a user's metadata bags. Each bag is tri-state: omit to leave it unchanged, or send an object value. Whether the object merges into or replaces the bag depends on the endpoint (see its operation description).
+    Body for minting an impersonation token.
     """ # noqa: E501
-    public_metadata: Optional[Dict[str, Any]] = Field(default=None, description="Public metadata bag: SDK-readable, server-written. Part of the 8 KB combined metadata budget.", alias="publicMetadata")
-    private_metadata: Optional[Dict[str, Any]] = Field(default=None, description="Private metadata bag: server-only, never exposed to the SDK or in a JWT. Part of the 8 KB combined metadata budget.", alias="privateMetadata")
-    unsafe_metadata: Optional[Dict[str, Any]] = Field(default=None, description="Unsafe metadata bag: readable and writable by the end-user via the SDK. Part of the 8 KB combined metadata budget.", alias="unsafeMetadata")
-    __properties: ClassVar[List[str]] = ["publicMetadata", "privateMetadata", "unsafeMetadata"]
+    actor_user_id: UUID = Field(description="The principal the impersonation is on behalf of (recorded for accountability). Must be a user in this environment.", alias="actorUserId")
+    reason: Annotated[str, Field(min_length=0, strict=True, max_length=500)] = Field(description="Mandatory justification (GDPR purpose limitation); recorded in the audit log on mint and redeem.")
+    expires_in_seconds: Optional[Annotated[int, Field(le=600, strict=True, ge=60)]] = Field(default=None, description="Optional token lifetime in seconds, 60..600. Omit for the 60s default.", alias="expiresInSeconds")
+    __properties: ClassVar[List[str]] = ["actorUserId", "reason", "expiresInSeconds"]
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -50,7 +52,7 @@ class UpdateUserMetadataRequest(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of UpdateUserMetadataRequest from a JSON string"""
+        """Create an instance of ServerImpersonationTokenRequest from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -71,11 +73,16 @@ class UpdateUserMetadataRequest(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # set to None if expires_in_seconds (nullable) is None
+        # and model_fields_set contains the field
+        if self.expires_in_seconds is None and "expires_in_seconds" in self.model_fields_set:
+            _dict['expiresInSeconds'] = None
+
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of UpdateUserMetadataRequest from a dict"""
+        """Create an instance of ServerImpersonationTokenRequest from a dict"""
         if obj is None:
             return None
 
@@ -83,9 +90,9 @@ class UpdateUserMetadataRequest(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "publicMetadata": obj.get("publicMetadata"),
-            "privateMetadata": obj.get("privateMetadata"),
-            "unsafeMetadata": obj.get("unsafeMetadata")
+            "actorUserId": obj.get("actorUserId"),
+            "reason": obj.get("reason"),
+            "expiresInSeconds": obj.get("expiresInSeconds")
         })
         return _obj
 

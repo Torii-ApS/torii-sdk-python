@@ -17,20 +17,22 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 from pydantic_core import to_jsonable_python
 
-class UpdateUserMetadataRequest(BaseModel):
+class CreateEnvironmentInvitationServerRequest(BaseModel):
     """
-    PATCH body for a user's metadata bags. Each bag is tri-state: omit to leave it unchanged, or send an object value. Whether the object merges into or replaces the bag depends on the endpoint (see its operation description).
+    CreateEnvironmentInvitationServerRequest
     """ # noqa: E501
-    public_metadata: Optional[Dict[str, Any]] = Field(default=None, description="Public metadata bag: SDK-readable, server-written. Part of the 8 KB combined metadata budget.", alias="publicMetadata")
-    private_metadata: Optional[Dict[str, Any]] = Field(default=None, description="Private metadata bag: server-only, never exposed to the SDK or in a JWT. Part of the 8 KB combined metadata budget.", alias="privateMetadata")
-    unsafe_metadata: Optional[Dict[str, Any]] = Field(default=None, description="Unsafe metadata bag: readable and writable by the end-user via the SDK. Part of the 8 KB combined metadata budget.", alias="unsafeMetadata")
-    __properties: ClassVar[List[str]] = ["publicMetadata", "privateMetadata", "unsafeMetadata"]
+    email: StrictStr
+    expires_in_days: Optional[StrictInt] = Field(default=None, alias="expiresInDays")
+    redirect_url: Optional[StrictStr] = Field(default=None, alias="redirectUrl")
+    public_metadata: Dict[str, Any] = Field(alias="publicMetadata")
+    private_metadata: Dict[str, Any] = Field(alias="privateMetadata")
+    __properties: ClassVar[List[str]] = ["email", "expiresInDays", "redirectUrl", "publicMetadata", "privateMetadata"]
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -50,7 +52,7 @@ class UpdateUserMetadataRequest(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of UpdateUserMetadataRequest from a JSON string"""
+        """Create an instance of CreateEnvironmentInvitationServerRequest from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -71,11 +73,21 @@ class UpdateUserMetadataRequest(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # set to None if expires_in_days (nullable) is None
+        # and model_fields_set contains the field
+        if self.expires_in_days is None and "expires_in_days" in self.model_fields_set:
+            _dict['expiresInDays'] = None
+
+        # set to None if redirect_url (nullable) is None
+        # and model_fields_set contains the field
+        if self.redirect_url is None and "redirect_url" in self.model_fields_set:
+            _dict['redirectUrl'] = None
+
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of UpdateUserMetadataRequest from a dict"""
+        """Create an instance of CreateEnvironmentInvitationServerRequest from a dict"""
         if obj is None:
             return None
 
@@ -83,9 +95,11 @@ class UpdateUserMetadataRequest(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
+            "email": obj.get("email"),
+            "expiresInDays": obj.get("expiresInDays"),
+            "redirectUrl": obj.get("redirectUrl"),
             "publicMetadata": obj.get("publicMetadata"),
-            "privateMetadata": obj.get("privateMetadata"),
-            "unsafeMetadata": obj.get("unsafeMetadata")
+            "privateMetadata": obj.get("privateMetadata")
         })
         return _obj
 

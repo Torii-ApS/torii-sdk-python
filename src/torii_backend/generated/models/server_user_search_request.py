@@ -20,20 +20,23 @@ import json
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List, Optional
+from uuid import UUID
 from typing import Optional, Set
 from typing_extensions import Self
 from pydantic_core import to_jsonable_python
 
 class ServerUserSearchRequest(BaseModel):
     """
-    Optional filter body for `POST /users/search`. Every field is tri-state: omit to skip that filter, send a value to require it. Fields whose inner type is nullable (currently `name`, `email`) additionally accept JSON null to filter for users where that column is null; the non-nullable `statuses` field rejects null.
+    Optional filter body for `POST /users/search`. Every field is tri-state: omit to skip that filter, send a value to apply it. The three id-selectors (`userIds`, `emailAddresses`, `email`) resolve users to a set of ids and, when more than one is supplied, are combined with AND (intersection); a supplied id-selector whose resolved set is empty returns an empty page. `name` additionally accepts JSON null to match users with no name; an explicit null or blank `email` contributes no restriction; the non-nullable `statuses` field rejects null.
     """ # noqa: E501
     name: Optional[StrictStr] = Field(default=None, description="Filter by name (case-insensitive substring match). Send null to require users with no name.")
-    email: Optional[StrictStr] = Field(default=None, description="Filter by primary email (case-insensitive substring match). Send null to require users with no email.")
+    user_ids: Optional[List[UUID]] = Field(default=None, description="Restrict to these user ids (the explicit batch-by-id lookup), at most 100. AND-combined with the other id-selectors; an empty list returns an empty page.", alias="userIds")
+    email_addresses: Optional[List[StrictStr]] = Field(default=None, description="Resolve users by exact (case-insensitive) email address (one or more, at most 100). Unlike `email`, never matches a superstring. AND-combined with the other id-selectors; an empty list, or addresses matching nobody, returns an empty page.", alias="emailAddresses")
+    email: Optional[StrictStr] = Field(default=None, description="Filter by primary email (case-insensitive substring match). AND-combined with the other id-selectors. An explicit null or blank value contributes no restriction.")
     statuses: Optional[List[StrictStr]] = Field(default=None, description="Filter by user status. Returns users matching any of the supplied statuses.")
     created_after: Optional[datetime] = Field(default=None, description="Only return users created at or after this instant (ISO-8601 UTC).", alias="createdAfter")
     created_before: Optional[datetime] = Field(default=None, description="Only return users created at or before this instant (ISO-8601 UTC).", alias="createdBefore")
-    __properties: ClassVar[List[str]] = ["name", "email", "statuses", "createdAfter", "createdBefore"]
+    __properties: ClassVar[List[str]] = ["name", "userIds", "emailAddresses", "email", "statuses", "createdAfter", "createdBefore"]
 
     @field_validator('statuses')
     def statuses_validate_enum(cls, value):
@@ -118,6 +121,8 @@ class ServerUserSearchRequest(BaseModel):
 
         _obj = cls.model_validate({
             "name": obj.get("name"),
+            "userIds": obj.get("userIds"),
+            "emailAddresses": obj.get("emailAddresses"),
             "email": obj.get("email"),
             "statuses": obj.get("statuses"),
             "createdAfter": obj.get("createdAfter"),

@@ -17,20 +17,34 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field
+from datetime import datetime
+from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List, Optional
+from uuid import UUID
 from typing import Optional, Set
 from typing_extensions import Self
 from pydantic_core import to_jsonable_python
 
-class UpdateUserMetadataRequest(BaseModel):
+class EnvironmentInvitationResponse(BaseModel):
     """
-    PATCH body for a user's metadata bags. Each bag is tri-state: omit to leave it unchanged, or send an object value. Whether the object merges into or replaces the bag depends on the endpoint (see its operation description).
+    EnvironmentInvitationResponse
     """ # noqa: E501
-    public_metadata: Optional[Dict[str, Any]] = Field(default=None, description="Public metadata bag: SDK-readable, server-written. Part of the 8 KB combined metadata budget.", alias="publicMetadata")
-    private_metadata: Optional[Dict[str, Any]] = Field(default=None, description="Private metadata bag: server-only, never exposed to the SDK or in a JWT. Part of the 8 KB combined metadata budget.", alias="privateMetadata")
-    unsafe_metadata: Optional[Dict[str, Any]] = Field(default=None, description="Unsafe metadata bag: readable and writable by the end-user via the SDK. Part of the 8 KB combined metadata budget.", alias="unsafeMetadata")
-    __properties: ClassVar[List[str]] = ["publicMetadata", "privateMetadata", "unsafeMetadata"]
+    id: UUID
+    environment_id: UUID = Field(alias="environmentId")
+    email: StrictStr
+    status: StrictStr
+    expires_at: datetime = Field(alias="expiresAt")
+    created_at: datetime = Field(alias="createdAt")
+    accepted_at: Optional[datetime] = Field(default=None, alias="acceptedAt")
+    revoked_at: Optional[datetime] = Field(default=None, alias="revokedAt")
+    __properties: ClassVar[List[str]] = ["id", "environmentId", "email", "status", "expiresAt", "createdAt", "acceptedAt", "revokedAt"]
+
+    @field_validator('status')
+    def status_validate_enum(cls, value):
+        """Validates the enum"""
+        if value not in set(['PENDING', 'ACCEPTED', 'REVOKED', 'EXPIRED']):
+            raise ValueError("must be one of enum values ('PENDING', 'ACCEPTED', 'REVOKED', 'EXPIRED')")
+        return value
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -50,7 +64,7 @@ class UpdateUserMetadataRequest(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of UpdateUserMetadataRequest from a JSON string"""
+        """Create an instance of EnvironmentInvitationResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -71,11 +85,21 @@ class UpdateUserMetadataRequest(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # set to None if accepted_at (nullable) is None
+        # and model_fields_set contains the field
+        if self.accepted_at is None and "accepted_at" in self.model_fields_set:
+            _dict['acceptedAt'] = None
+
+        # set to None if revoked_at (nullable) is None
+        # and model_fields_set contains the field
+        if self.revoked_at is None and "revoked_at" in self.model_fields_set:
+            _dict['revokedAt'] = None
+
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of UpdateUserMetadataRequest from a dict"""
+        """Create an instance of EnvironmentInvitationResponse from a dict"""
         if obj is None:
             return None
 
@@ -83,9 +107,14 @@ class UpdateUserMetadataRequest(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "publicMetadata": obj.get("publicMetadata"),
-            "privateMetadata": obj.get("privateMetadata"),
-            "unsafeMetadata": obj.get("unsafeMetadata")
+            "id": obj.get("id"),
+            "environmentId": obj.get("environmentId"),
+            "email": obj.get("email"),
+            "status": obj.get("status"),
+            "expiresAt": obj.get("expiresAt"),
+            "createdAt": obj.get("createdAt"),
+            "acceptedAt": obj.get("acceptedAt"),
+            "revokedAt": obj.get("revokedAt")
         })
         return _obj
 

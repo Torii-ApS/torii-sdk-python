@@ -17,20 +17,19 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field
-from typing import Any, ClassVar, Dict, List, Optional
+from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
+from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 from pydantic_core import to_jsonable_python
 
-class UpdateUserMetadataRequest(BaseModel):
+class ServerImpersonationTokenResponse(BaseModel):
     """
-    PATCH body for a user's metadata bags. Each bag is tri-state: omit to leave it unchanged, or send an object value. Whether the object merges into or replaces the bag depends on the endpoint (see its operation description).
+    A minted impersonation token.
     """ # noqa: E501
-    public_metadata: Optional[Dict[str, Any]] = Field(default=None, description="Public metadata bag: SDK-readable, server-written. Part of the 8 KB combined metadata budget.", alias="publicMetadata")
-    private_metadata: Optional[Dict[str, Any]] = Field(default=None, description="Private metadata bag: server-only, never exposed to the SDK or in a JWT. Part of the 8 KB combined metadata budget.", alias="privateMetadata")
-    unsafe_metadata: Optional[Dict[str, Any]] = Field(default=None, description="Unsafe metadata bag: readable and writable by the end-user via the SDK. Part of the 8 KB combined metadata budget.", alias="unsafeMetadata")
-    __properties: ClassVar[List[str]] = ["publicMetadata", "privateMetadata", "unsafeMetadata"]
+    token: StrictStr = Field(description="The single-use token. Redeem via POST /_torii/auth/session/impersonate.")
+    expires_in_seconds: StrictInt = Field(description="The token's lifetime in seconds (the resolved value after any override).", alias="expiresInSeconds")
+    __properties: ClassVar[List[str]] = ["token", "expiresInSeconds"]
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -50,7 +49,7 @@ class UpdateUserMetadataRequest(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of UpdateUserMetadataRequest from a JSON string"""
+        """Create an instance of ServerImpersonationTokenResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -75,7 +74,7 @@ class UpdateUserMetadataRequest(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of UpdateUserMetadataRequest from a dict"""
+        """Create an instance of ServerImpersonationTokenResponse from a dict"""
         if obj is None:
             return None
 
@@ -83,9 +82,8 @@ class UpdateUserMetadataRequest(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "publicMetadata": obj.get("publicMetadata"),
-            "privateMetadata": obj.get("privateMetadata"),
-            "unsafeMetadata": obj.get("unsafeMetadata")
+            "token": obj.get("token"),
+            "expiresInSeconds": obj.get("expiresInSeconds")
         })
         return _obj
 

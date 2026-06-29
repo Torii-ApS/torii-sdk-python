@@ -17,20 +17,22 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, StrictBool
 from typing import Any, ClassVar, Dict, List, Optional
+from uuid import UUID
+from torii_backend.generated.models.environment_invitation_response import EnvironmentInvitationResponse
 from typing import Optional, Set
 from typing_extensions import Self
 from pydantic_core import to_jsonable_python
 
-class UpdateUserMetadataRequest(BaseModel):
+class CursorPageResponseEnvironmentInvitationResponse(BaseModel):
     """
-    PATCH body for a user's metadata bags. Each bag is tri-state: omit to leave it unchanged, or send an object value. Whether the object merges into or replaces the bag depends on the endpoint (see its operation description).
+    A single page of results in a cursor-paginated list. Pass `nextCursor` as the `cursor` query parameter to fetch the following page.
     """ # noqa: E501
-    public_metadata: Optional[Dict[str, Any]] = Field(default=None, description="Public metadata bag: SDK-readable, server-written. Part of the 8 KB combined metadata budget.", alias="publicMetadata")
-    private_metadata: Optional[Dict[str, Any]] = Field(default=None, description="Private metadata bag: server-only, never exposed to the SDK or in a JWT. Part of the 8 KB combined metadata budget.", alias="privateMetadata")
-    unsafe_metadata: Optional[Dict[str, Any]] = Field(default=None, description="Unsafe metadata bag: readable and writable by the end-user via the SDK. Part of the 8 KB combined metadata budget.", alias="unsafeMetadata")
-    __properties: ClassVar[List[str]] = ["publicMetadata", "privateMetadata", "unsafeMetadata"]
+    items: List[EnvironmentInvitationResponse] = Field(description="Items in this page, in stable order.")
+    next_cursor: Optional[UUID] = Field(default=None, description="Cursor to pass to fetch the next page. Null when this is the last page.", alias="nextCursor")
+    has_more: StrictBool = Field(description="True if more pages are available (equivalent to `nextCursor != null`).", alias="hasMore")
+    __properties: ClassVar[List[str]] = ["items", "nextCursor", "hasMore"]
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -50,7 +52,7 @@ class UpdateUserMetadataRequest(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of UpdateUserMetadataRequest from a JSON string"""
+        """Create an instance of CursorPageResponseEnvironmentInvitationResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -71,11 +73,23 @@ class UpdateUserMetadataRequest(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # override the default output from pydantic by calling `to_dict()` of each item in items (list)
+        _items = []
+        if self.items:
+            for _item_items in self.items:
+                if _item_items:
+                    _items.append(_item_items.to_dict())
+            _dict['items'] = _items
+        # set to None if next_cursor (nullable) is None
+        # and model_fields_set contains the field
+        if self.next_cursor is None and "next_cursor" in self.model_fields_set:
+            _dict['nextCursor'] = None
+
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of UpdateUserMetadataRequest from a dict"""
+        """Create an instance of CursorPageResponseEnvironmentInvitationResponse from a dict"""
         if obj is None:
             return None
 
@@ -83,9 +97,9 @@ class UpdateUserMetadataRequest(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "publicMetadata": obj.get("publicMetadata"),
-            "privateMetadata": obj.get("privateMetadata"),
-            "unsafeMetadata": obj.get("unsafeMetadata")
+            "items": [EnvironmentInvitationResponse.from_dict(_item) for _item in obj["items"]] if obj.get("items") is not None else None,
+            "nextCursor": obj.get("nextCursor"),
+            "hasMore": obj.get("hasMore")
         })
         return _obj
 
