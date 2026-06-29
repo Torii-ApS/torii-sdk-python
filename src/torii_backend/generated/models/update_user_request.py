@@ -30,7 +30,7 @@ class UpdateUserRequest(BaseModel):
     first_name: Optional[StrictStr] = Field(default=None, description="New first (given) name. Send null to clear; omit to leave unchanged.", alias="firstName")
     last_name: Optional[StrictStr] = Field(default=None, description="New last (family) name. Send null to clear; omit to leave unchanged.", alias="lastName")
     locale: Optional[StrictStr] = Field(default=None, description="New preferred locale. Send null to clear; omit to leave unchanged.")
-    unsafe_metadata: Optional[Dict[str, Any]] = Field(default=None, description="Deep-merges into the user's unsafe metadata (a key set to null removes it); omit to leave unchanged. Merged result max 512 bytes.", alias="unsafeMetadata")
+    unsafe_metadata: Optional[Dict[str, Any]] = Field(default=None, description="Deep-merges into the user's unsafe metadata (a key set to null removes it); omit to leave unchanged. Counts toward the 8 KB combined metadata budget.", alias="unsafeMetadata")
     __properties: ClassVar[List[str]] = ["firstName", "lastName", "locale", "unsafeMetadata"]
 
     @field_validator('locale')
