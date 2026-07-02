@@ -18,7 +18,7 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List
+from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 from pydantic_core import to_jsonable_python
@@ -27,9 +27,10 @@ class ServerImpersonationTokenResponse(BaseModel):
     """
     A minted impersonation token.
     """ # noqa: E501
-    token: StrictStr = Field(description="The single-use token. Redeem via POST /_torii/auth/session/impersonate.")
+    token: StrictStr = Field(description="The single-use token. Redeem via POST /_torii/auth/session/impersonate, or hand the ready-to-use `url` to an operator.")
     expires_in_seconds: StrictInt = Field(description="The token's lifetime in seconds (the resolved value after any override).", alias="expiresInSeconds")
-    __properties: ClassVar[List[str]] = ["token", "expiresInSeconds"]
+    url: Optional[StrictStr] = Field(default=None, description="A ready-to-use, navigable redeem link on the environment's Frontend API host. Opening it in a browser establishes the impersonated session and redirects to the landing URL. Backed by the same single-use token. Null when no landing URL could be resolved (no `redirectUrl` given and the environment has no concrete allowed origin) — redeem the `token` via POST instead.")
+    __properties: ClassVar[List[str]] = ["token", "expiresInSeconds", "url"]
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -70,6 +71,11 @@ class ServerImpersonationTokenResponse(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # set to None if url (nullable) is None
+        # and model_fields_set contains the field
+        if self.url is None and "url" in self.model_fields_set:
+            _dict['url'] = None
+
         return _dict
 
     @classmethod
@@ -83,7 +89,8 @@ class ServerImpersonationTokenResponse(BaseModel):
 
         _obj = cls.model_validate({
             "token": obj.get("token"),
-            "expiresInSeconds": obj.get("expiresInSeconds")
+            "expiresInSeconds": obj.get("expiresInSeconds"),
+            "url": obj.get("url")
         })
         return _obj
 
