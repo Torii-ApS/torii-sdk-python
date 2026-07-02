@@ -17,7 +17,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from typing_extensions import Annotated
 from uuid import UUID
@@ -31,8 +31,9 @@ class ServerImpersonationTokenRequest(BaseModel):
     """ # noqa: E501
     actor_user_id: UUID = Field(description="The principal the impersonation is on behalf of (recorded for accountability). Must be a user in this environment.", alias="actorUserId")
     reason: Annotated[str, Field(min_length=0, strict=True, max_length=500)] = Field(description="Mandatory justification (GDPR purpose limitation); recorded in the audit log on mint and redeem.")
-    expires_in_seconds: Optional[Annotated[int, Field(le=600, strict=True, ge=60)]] = Field(default=None, description="Optional token lifetime in seconds, 60..600. Omit for the 60s default.", alias="expiresInSeconds")
-    __properties: ClassVar[List[str]] = ["actorUserId", "reason", "expiresInSeconds"]
+    redirect_url: Optional[StrictStr] = Field(default=None, description="Optional post-redeem landing URL for the `url` redeem link; its origin must be in the environment's allowed origins. Omit to default to the environment's first non-wildcard allowed origin.", alias="redirectUrl")
+    expires_in_seconds: Optional[Annotated[int, Field(le=600, strict=True, ge=60)]] = Field(default=None, description="Optional token lifetime in seconds, 60..600. Omit for the 600s default.", alias="expiresInSeconds")
+    __properties: ClassVar[List[str]] = ["actorUserId", "reason", "redirectUrl", "expiresInSeconds"]
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -73,6 +74,11 @@ class ServerImpersonationTokenRequest(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # set to None if redirect_url (nullable) is None
+        # and model_fields_set contains the field
+        if self.redirect_url is None and "redirect_url" in self.model_fields_set:
+            _dict['redirectUrl'] = None
+
         # set to None if expires_in_seconds (nullable) is None
         # and model_fields_set contains the field
         if self.expires_in_seconds is None and "expires_in_seconds" in self.model_fields_set:
@@ -92,6 +98,7 @@ class ServerImpersonationTokenRequest(BaseModel):
         _obj = cls.model_validate({
             "actorUserId": obj.get("actorUserId"),
             "reason": obj.get("reason"),
+            "redirectUrl": obj.get("redirectUrl"),
             "expiresInSeconds": obj.get("expiresInSeconds")
         })
         return _obj
